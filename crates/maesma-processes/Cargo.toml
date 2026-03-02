@@ -1,0 +1,12 @@
+[package]
+name = "maesma-processes"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+maesma-core = { path = "../maesma-core" }
+serde.workspace = true
+ndarray.workspace = true
+tracing.workspace = true

@@ -1,0 +1,78 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/maesma-core",
+    "crates/maesma-knowledgebase",
+    "crates/maesma-agents",
+    "crates/maesma-compiler",
+    "crates/maesma-runtime",
+    "crates/maesma-processes",
+    "crates/maesma-inference",
+    "crates/maesma-federation",
+    "crates/maesma-cli",
+    "crates/maesma-api",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Nervosys"]
+license = "Apache-2.0"
+repository = "https://github.com/nervosys/ModularAgenticESM"
+
+[workspace.dependencies]
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Error handling
+thiserror = "2"
+anyhow = "1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# UUID
+uuid = { version = "1", features = ["v4", "v5", "serde"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Collections
+indexmap = { version = "2", features = ["serde"] }
+petgraph = "0.7"
+
+# Database
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# HTTP / API
+axum = { version = "0.8", features = ["ws"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+reqwest = { version = "0.12", features = ["json"] }
+
+# Numeric
+ndarray = { version = "0.16", features = ["serde"] }
+nalgebra = "0.33"
+
+# Hashing
+blake3 = "1"
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# Workspace crates
+maesma-core = { path = "crates/maesma-core" }
+maesma-knowledgebase = { path = "crates/maesma-knowledgebase" }
+maesma-agents = { path = "crates/maesma-agents" }
+maesma-compiler = { path = "crates/maesma-compiler" }
+maesma-runtime = { path = "crates/maesma-runtime" }
+maesma-processes = { path = "crates/maesma-processes" }
+maesma-inference = { path = "crates/maesma-inference" }
+maesma-federation = { path = "crates/maesma-federation" }
+maesma-api = { path = "crates/maesma-api" }

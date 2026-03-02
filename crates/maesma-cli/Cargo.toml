@@ -1,0 +1,27 @@
+[package]
+name = "maesma-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "maesma"
+path = "src/main.rs"
+
+[dependencies]
+maesma-core = { path = "../maesma-core" }
+maesma-knowledgebase = { path = "../maesma-knowledgebase" }
+maesma-agents = { path = "../maesma-agents" }
+maesma-compiler = { path = "../maesma-compiler" }
+maesma-runtime = { path = "../maesma-runtime" }
+maesma-processes = { path = "../maesma-processes" }
+maesma-inference = { path = "../maesma-inference" }
+maesma-federation = { path = "../maesma-federation" }
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+clap.workspace = true
+tracing.workspace = true
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow.workspace = true

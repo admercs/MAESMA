@@ -1,0 +1,19 @@
+[package]
+name = "maesma-core"
+description = "Core traits, types, and domain primitives for MAESMA"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+indexmap = { workspace = true }
+petgraph = { workspace = true }
+ndarray = { workspace = true }
+blake3 = { workspace = true }
+tracing = { workspace = true }

@@ -1,0 +1,21 @@
+[package]
+name = "maesma-api"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+maesma-core = { path = "../maesma-core" }
+maesma-knowledgebase = { path = "../maesma-knowledgebase" }
+maesma-agents = { path = "../maesma-agents" }
+maesma-compiler = { path = "../maesma-compiler" }
+maesma-runtime = { path = "../maesma-runtime" }
+maesma-federation = { path = "../maesma-federation" }
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+axum.workspace = true
+tracing.workspace = true
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
