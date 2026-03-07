@@ -64,8 +64,16 @@
     MAESMA: Autonomous Agentic AI for Earth System Model Discovery via Knowledgebase-Centric Neural Inference
   ]
   #v(0.6em)
+  #text(size: 12pt)[
+    Adam Erickson
+  ]
+  #v(0.3em)
   #text(size: 11pt, fill: luma(80))[
-    Nervosys
+    NERVOSYS
+  ]
+  #v(0.2em)
+  #text(size: 10pt, fill: luma(100))[
+    opensource\@nervosys.ai
   ]
   #v(0.3em)
   #text(size: 10pt, fill: luma(120))[
