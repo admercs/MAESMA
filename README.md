@@ -1,6 +1,10 @@
-# Modular Agentic Earth System Modeling Arena (MAESMA)
+<p align="center">
+  <img src="media/banner_logo.png" alt="MAESMA logo" width="100%">
+</p>
 
-Autonomous agentic AI for Earth system model discovery. A multi-agent system for inferential process discovery, combination, simulation, and evolution. A central Process Knowledgebase stores all process models, implementations, and ontological metadata. Agents reason over the knowledgebase via a neural inference engine — selecting, composing, and inventing process representations driven by simulation errors and uncertainties. Process models are treated as living organisms: they compete for compute, earn survival through skill, replicate via mutation and crossover, and face extinction when stagnant — an artificial life (ALife) framework for autonomous model construction.
+<h3 align="center">An autonomous system for Earth observation and system modeling (EOSM). The final Earth system modeling framework.</h3>
+
+Modular Agentic Earth System Modeling Arena (MAESMA) is an autonomous agentic AI system for Earth system observation and model discovery. A multi-agent system for inferential process discovery, combination, simulation, and evolution. A central Process Knowledgebase stores all process models, implementations, and ontological metadata. Agents reason over the knowledgebase via a neural inference engine — selecting, composing, and inventing process representations driven by simulation errors and uncertainties. Process models are treated as living organisms: they compete for compute, earn survival through skill, replicate via mutation and crossover, and face extinction when stagnant — an artificial life (ALife) framework for autonomous model construction.
 
 ## Overview
 
