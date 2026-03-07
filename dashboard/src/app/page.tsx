@@ -16,7 +16,7 @@ export default function Home() {
         <header className="mb-8">
           <h1 className="text-2xl font-bold">MAESMA Dashboard</h1>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Modular Agentic Earth System Modeling Arena
+            Agentic AI for Autonomous Earth System Observation, Model Discovery, and Simulation
           </p>
         </header>
 

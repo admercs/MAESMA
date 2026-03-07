@@ -1,4 +1,4 @@
-//! MAESMA CLI — command-line interface for the Modular Agentic Earth System Modeling Arena.
+//! MAESMA CLI — command-line interface for agentic AI for autonomous Earth system observation, model discovery, and simulation.
 
 use clap::{Parser, Subcommand};
 use tracing_subscriber::EnvFilter;
@@ -6,7 +6,7 @@ use tracing_subscriber::EnvFilter;
 #[derive(Parser)]
 #[command(
     name = "maesma",
-    about = "Modular Agentic Earth System Modeling Arena",
+    about = "Agentic AI for Autonomous Earth System Observation, Model Discovery, and Simulation",
     version,
     long_about = "MAESMA: An agentic framework for autonomously assembling, benchmarking, \
                   and evolving Earth system model configurations from a Process Knowledgebase."
@@ -171,9 +171,14 @@ async fn main() -> anyhow::Result<()> {
         }
 
         Commands::Info => {
-            println!("MAESMA — Modular Agentic Earth System Modeling Arena");
+            println!(
+                "MAESMA — Agentic AI for Autonomous Earth System Observation, Model Discovery, and Simulation"
+            );
             println!("Version: {}", env!("CARGO_PKG_VERSION"));
-            println!("Process families: {}", maesma_core::ProcessFamily::all().len());
+            println!(
+                "Process families: {}",
+                maesma_core::ProcessFamily::all().len()
+            );
             println!("Fidelity rungs:   R0 → R3");
         }
     }

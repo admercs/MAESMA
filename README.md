@@ -2,35 +2,42 @@
   <img src="media/banner_logo.png" alt="MAESMA logo" width="100%">
 </p>
 
-<h3 align="center">An autonomous system for Earth observation and system modeling (EOSM). The final Earth system modeling framework.</h3>
+<h3 align="center">Agentic AI for Autonomous Earth System Observation, Model Discovery, and Simulation</h3>
 
-Modular Agentic Earth System Modeling Arena (MAESMA) is an autonomous agentic AI system for Earth system observation and model discovery. A multi-agent system for inferential process discovery, combination, simulation, and evolution. A central Process Knowledgebase stores all process models, implementations, and ontological metadata. Agents reason over the knowledgebase via a neural inference engine — selecting, composing, and inventing process representations driven by simulation errors and uncertainties. Process models are treated as living organisms: they compete for compute, earn survival through skill, replicate via mutation and crossover, and face extinction when stagnant — an artificial life (ALife) framework for autonomous model construction.
+MAESMA is an agentic AI system that autonomously discovers, assembles, benchmarks, selects, and invents Earth system model configurations. At its center lies a versioned **Process Knowledgebase** — the single store of all process models, manifests, ontological metadata, and skill records. A 25-agent swarm reasons over this knowledgebase via a **neural inference engine** (graph transformer), proposing process selections driven by simulation errors and uncertainties. Process models are treated as **living organisms**: they compete for compute, earn survival through predictive skill, replicate via mutation and crossover, and face extinction when stagnant — an artificial life framework for autonomous model construction.
 
-## Overview
+## Key Ideas
 
-1. **Human-out-of-loop** — Runs autonomously and indefinitely; humans monitor via dashboard, never gate workflow
-2. **Salient dynamics first** — Agents prioritize processes with the greatest effect on the time evolution of system states; lower-impact processes are added incrementally as budget and accuracy targets demand
-3. **Automated data discovery** — Agents crawl STAC/CMR/CKAN for observations, preprocess, ingest, expand validation coverage
-4. **Central Process Knowledgebase** — Single versioned store of all process models (code, manifests, ontologies, skill records); agents query, deposit, and reason over this knowledgebase for all model construction decisions
-5. **Neural inference engine** — Graph transformer over the knowledgebase (process embeddings, skill records, error fields, regime context) proposes process selections; replaces hand-crafted heuristics with learned reasoning
-6. **Error/uncertainty-driven selection** — Simulation errors and posterior uncertainties propagate to the inference engine; every model–observation mismatch reshapes process selection and triggers discovery
-7. **Process discovery → knowledgebase** — Core workflow step: residual analysis → learn new representations from observations → validate → deposit into knowledgebase for subsequent model integration and experiments
-8. **Infinite loop** — Discover data → query knowledgebase → assemble → benchmark → select → discover processes → deposit into knowledgebase → repeat
-9. **Ontology-indexed knowledgebase** — Unified ontology indexes all knowledgebase contents; every process, dataset, and metric is agent-discoverable; new entries available upon registration
-10. **Live dashboard** — Next.js real-time monitoring: agent workflows, Pareto frontiers, skill evolution, data ingestion
-11. **Scale-aware compilation** — Compiler validates conservation, closure, coupling constraints across assembled process graphs
-12. **Full EESM coverage** — All DOE EESM program areas: ESMD, RGMA, MSD
-13. **A2A federation** — Inter-institutional agent collaboration via A2A protocol; federated assembly and skill sharing
-14. **Geoengineering control** — Closed-loop: physical (SAI, MCB, OAE, DAC, SRM, cloud seeding, enhanced weathering), biological (genetic modification, gene drives), and management (afforestation, MPAs, resource allocation) interventions
-15. **Planetary defense** — All mass extinction drivers: impacts, LIP volcanism, GOE, Snowball Earth, GRBs, supernovae, pandemics, anthropogenic; NEO tracking from JPL/USAF/USSF/ESA
-16. **Trophic dynamics** — Multi-trophic food webs as first-class processes: allometric scaling, metabolic theory, functional responses
-17. **Evolution & phylogeography** — Trait evolution, speciation, extinction, adaptive radiation; gene flow over space/time via migration corridors, dispersal barriers, vicariance
-18. **Population dynamics** — Human demographics + land use + resource consumption coupled with species density-dependence, Allee effects, dispersal, metapopulation structure
-19. **GPU acceleration** — Multi-GPU execution via wgpu/cudarc with NVIDIA Modulus neural operators (FNO, PINO, DeepONet, MeshGraphNet) for physics-informed emulation
-20. **Foundation models** — NVIDIA Earth-2/earth2studio integration (FourCastNet, Pangu-Weather, GraphCast, GenCast, CorrDiff) as ensemble backbone; Foundation Model Agent orchestrates inference
-21. **Autonomous observation** — PhiSat-2-inspired edge AI for satellite-side anomaly detection, adaptive tasking, and real-time observation triggering
-22. **Artificial life process evolution** — Processes are living organisms with survival tiers, constitutional invariants, heartbeat monitoring, process souls, self-replication, and phylogenetic lineage tracking
-23. **Inferential process discovery** — Multi-agent system for inferential process discovery, combination, simulation, and evolution — errors drive the entire lifecycle
+### Autonomy
+- **Human-out-of-loop** — Runs autonomously and indefinitely; humans monitor via dashboard, never gate the workflow
+- **Infinite loop** — Discover data → query knowledgebase → assemble → benchmark → select → discover processes → deposit → repeat
+- **Never idle** — Every simulation advances the posterior; there is always a next hypothesis to test
+
+### Knowledgebase-Centric Design
+- **Central Process Knowledgebase** — Single versioned store of all process models (code, manifests, ontologies, skill records); agents query, deposit, and reason over it for all model construction decisions
+- **Ontology-indexed** — Unified ontology indexes all knowledgebase contents; every process, dataset, and metric is agent-discoverable upon registration
+- **Knowledge compounds** — Every discovered process, every skill record, every observation feeds back into the central store
+
+### Inference and Selection
+- **Neural inference engine** — Graph transformer over the knowledgebase proposes process selections from errors, uncertainty, regime context, and compute budgets; replaces hand-crafted heuristics with learned reasoning
+- **Salient dynamics first** — Agents prioritize processes with the greatest effect on state evolution; lower-impact detail is added incrementally as budget and accuracy targets demand
+- **Error-driven selection** — Every model–observation mismatch reshapes process selection and triggers discovery
+
+### Discovery and Evolution
+- **Process discovery** — Residual analysis → learn new representations from observations → validate → deposit into knowledgebase
+- **Artificial life** — Processes are living organisms with survival tiers, constitutional invariants, heartbeat monitoring, self-replication, and phylogenetic lineage tracking
+- **GPU-accelerated learning** — NVIDIA Modulus neural operators (FNO, PINO, DeepONet, MeshGraphNet) for physics-informed emulation on multi-GPU hardware
+
+### Integrations
+- **Foundation models** — NVIDIA Earth-2 (FourCastNet, Pangu-Weather, GraphCast, GenCast) as GPU-accelerated atmosphere rungs
+- **Autonomous observation** — PhiSat-2-inspired edge AI for satellite-side anomaly detection, adaptive tasking, and active data acquisition
+- **A2A federation** — Inter-institutional agent collaboration and skill sharing via the A2A protocol
+
+### Scope
+- **13 process families** — Fire, hydrology, ecology, biogeochemistry, radiation, atmosphere, ocean, cryosphere, human systems, trophic dynamics, evolution, geomorphology, geology
+- **Geoengineering control** — 14 intervention types with closed-loop MPC, termination shock analysis, and tipping point avoidance
+- **Planetary defense** — All mass extinction drivers modeled and calibrated against 13 historical events spanning 2.4 billion years
+- **Full DOE EESM coverage** — ESMD, RGMA, MSD program areas
 
 ## Architecture
 
@@ -689,146 +696,71 @@ Embedded domains allocate scratch on GPU; transfer only boundaries and summarize
 ## Project Structure
 
 ```text
-core/
-  registry/           # Variables, units, semantics
-  graph_ir/           # Process graph IR
-  compiler/           # Rung selection, closure, schedule generation
-  runtime/            # Task scheduler, device manager, event bus
-  scoring/            # Skill metrics, comparison protocols
-  optimizer/          # Fitness-driven selection loop
-  a2a/                # A2A protocol: agent cards, tasks, artifacts
-knowledgebase/
-  inference/          # Neural inference engine (graph transformer)
-  index/              # Unified index over code, manifests, skills
-  embeddings/         # Process + error + regime embeddings
-  migrations/         # KB schema evolution
-ontology/
-  schema/             # Type + relation definitions
-  processes/          # Process ontology instances
-  datasets/           # Dataset ontology instances
-  metrics/            # Metric ontology instances
-  graph/              # Compiled graph index
-process_registry/
-  schema/             # Manifest schema
-  hydrology/          # H0–H2 manifests
-  fire/               # F0–F3 manifests
-  ecology/            # E0–E2 manifests
-  biogeochem/         # B0–B2 manifests
-  radiation/          # R0–R2 manifests
-  atmosphere/         # A0–A3 manifests
-  ocean/              # O0–O2 manifests
-  cryosphere/         # C0–C2 manifests
-  human_systems/      # HS0–HS3 manifests
-  trophic_dynamics/   # TD0–TD2 manifests
-  evolution/          # EV0–EV2 manifests
-modules/
-  radiation/          # R0, R1
-  hydrology/          # H0, H1, routing
-  ecology/            # E0
-  biogeochem/         # B0, B1
-  fire/               # F1, F2
-  atmosphere/         # A0, A1
-  ocean/              # O0, O1
-  cryosphere/         # C0, C1
-  human_systems/      # HS0, HS1
-  trophic_dynamics/   # TD0, TD1
-  evolution/          # EV0, EV1
-operators/
-  remap/              # Conservative remapping
-  projection/         # State transforms between rungs
-  coupling/           # Cross-component operators
-benchmark/
-  observations/       # Observation registry manifests
-  skill_store/        # Append-only skill database
-  hypotheses/         # Configuration experiments
-  experiments/        # Runners, emulators, BMA
-  diagnostics/        # ILAMB, IOMB, E3SM Diags
-scenarios/
-  data_manifests/     # Forcing sources, parameter priors
-  msd/                # MSD scenario definitions
-agents/
-  a2a_gateway/        # Peer discovery, task routing
-  msd_coupling/       # Natural ↔ human coupling
-  scenario_discovery/ # AI-driven scenario exploration
-  eesm_diagnostics/   # Multi-component evaluation
-  process_discovery/  # Residual analysis, ML learning
-  geoengineering/     # Intervention optimization
-  planetary_defense/  # NEO tracking, impact modeling
-  trophic_dynamics/   # Food web assembly
-  evolution/          # Eco-evolutionary dynamics
-geoengineering/
-  interventions/      # Intervention manifests
-  strategies/         # Evaluated strategy records
-  control/            # Control law implementations
-  termination/        # Termination shock analysis
-planetary_defense/
-  neo_catalog/        # NEO data ingest
-  extinctions/        # Mass extinction scenarios
-  impact_models/      # Impact cascade pipeline
-  deflection/         # Deflection strategy modeling
-discovery/
-  residual_analysis/  # Bias detection + attribution
-  learners/           # Neural operators, symbolic regression
-  validators/         # Conservation, stability, generalization
-  manifest_gen/       # Auto-manifest generation
+crates/
+  maesma-core/          # Domain types, traits, invariants (ProcessRunner, SAPG, ontology, ALife)
+  maesma-knowledgebase/ # SQLite-backed KB with BLAKE3 content-addressing; seed manifests + relations
+  maesma-agents/        # 25 agent implementations behind async Agent trait
+  maesma-compiler/      # SAPG conservation closure, scale compatibility, coupling validation
+  maesma-runtime/       # Simulation execution engine: scheduler, event bus, health monitor
+  maesma-processes/     # 13 process family modules implementing ProcessRunner
+  maesma-inference/     # Neural inference abstraction (graph transformer trait)
+  maesma-federation/    # A2A federation client (peer discovery, trust, artifact exchange)
+  maesma-api/           # Axum REST + WebSocket server (12 endpoints)
+  maesma-cli/           # CLI entry point: init, kb, validate, run, serve, info
 dashboard/
-  app/                # Next.js pages
-  components/         # React components
-  lib/                # Event store client, WebSocket
-reference/            # Existing ESMs for study
+  src/app/              # Next.js 15 App Router pages
+  src/components/       # React components (ECharts, MapLibre GL JS, agent status)
+ontology/               # Unified ontology specification
+process_registry/       # Process manifest schema and documentation
+paper/                  # Research paper (Typst)
+reference/              # 50 reference ESMs for study and KB seeding
+animation/              # Remotion animation scenes
 ```
 
 ## Design Principles
 
-1. **Agents are the system** — Primary actors at every lifecycle stage; intelligence in the swarm, not configuration
-2. **Salient dynamics first** — Prioritize processes with the greatest effect on time evolution of system states; add detail incrementally as budget and accuracy demand
-3. **Never idle** — Every simulation advances the posterior; always a next hypothesis to test
-3. **Continual, not one-shot** — Model selection evolves with observations, regimes, and discoveries
-4. **Declarative contracts** — Modules declare I/O, scale, conservation; compiler wires; agents reason over contracts
-5. **Conservation enforced** — Mass/energy preserved in remapping, aggregation, rung transitions
-6. **Information-loss tracked** — Every downscale/downgrade attaches uncertainty; drives upgrade decisions
-7. **Hysteresis switching** — Rung transitions use hold timers, not single-timestep flipping
-8. **Provenance by default** — Every model + data artifact: hashed, dependency-graphed, reproducible
-9. **Bayesian structural learning** — Posterior over structures, not just parameters; BMA for predictions
-10. **Knowledgebase-first extensibility** — New representation = manifest + code + provenance → deposit into knowledgebase → auto-benchmark + integrate
-11. **Federated by design** — A2A collaboration without centralizing proprietary data
-12. **Human–natural coupling** — Human systems are first-class process families, not boundary conditions
-13. **AI processes are first-class** — Discovered representations carry full manifests, provenance, validation
-14. **Discovery deposits into knowledgebase** — Residual analysis every cycle; learned representations deposited into central knowledgebase for subsequent integration
-15. **Knowledgebase is the config** — No hard-coded resources; everything discoverable via ontology-indexed knowledgebase queries
-16. **Monitoring never blocks** — Dashboard observe-only; steering takes effect next cycle
+1. **Agents are the system** — Intelligence resides in the swarm, not in configuration files
+2. **Salient dynamics first** — Prioritize processes with the greatest effect on state evolution; add detail incrementally
+3. **Never idle** — Every simulation advances the posterior; there is always a next hypothesis
+4. **Continual, not one-shot** — Model selection evolves with observations, regimes, and discoveries
+5. **Declarative contracts** — Modules declare I/O, scale, conservation; compiler wires; agents reason over contracts
+6. **Conservation enforced** — Mass and energy preserved across remapping, aggregation, and rung transitions
+7. **Information-loss tracked** — Every downscale or downgrade attaches uncertainty; drives upgrade decisions
+8. **Hysteresis switching** — Rung transitions use hold timers, not single-timestep flipping
+9. **Provenance by default** — Every artifact is hashed, dependency-graphed, and reproducible
+10. **Bayesian structural learning** — Posterior over structures, not just parameters; BMA for predictions
+11. **Knowledgebase-first extensibility** — New representation = manifest + code + provenance → deposit → auto-benchmark
+12. **Federated by design** — A2A collaboration without centralizing proprietary data
+13. **Human–natural coupling** — Human systems are first-class process families, not boundary conditions
+14. **AI processes are first-class** — Discovered representations carry full manifests, provenance, and validation
+15. **Knowledgebase is the config** — No hard-coded resources; everything discoverable via ontology queries
+16. **Monitoring never blocks** — Dashboard is observe-only; steering takes effect next cycle
 17. **Geoengineering = control** — Feedback loop with stability verification, not static scenarios
-18. **Planetary defense = full coupling** — Extinctions through complete ESM; paleo-calibrated
-19. **Trophic/evolution are planetary** — Food webs, eco-evolutionary dynamics are first-class
-20. **All timescales** — Seconds (fire) through millions of years (extinction recovery)
-21. **Neural inference over knowledgebase** — Process selection driven by a learned neural model reasoning over the knowledgebase; errors and uncertainties are the primary input signals
-22. **Knowledgebase grows continuously** — Every discovered process, every skill record, every observation feeds back into the central store; the system's knowledge compounds over time
-23. **Processes are alive** — Process models are living organisms with survival tiers, constitutional invariants, heartbeat monitoring, self-replication, and phylogenetic lineage; they earn existence through demonstrated skill
+18. **Planetary defense = full coupling** — Extinctions routed through the complete coupled ESM
+19. **All timescales** — Seconds (fire spread) through millions of years (extinction recovery)
+20. **Neural inference over knowledgebase** — Learned reasoning replaces heuristics; errors are the primary signal
+21. **Knowledge compounds** — Every discovered process and skill record feeds back into the central store
+22. **Processes are alive** — Living organisms with survival tiers, constitutional invariants, heartbeat monitoring, and phylogenetic lineage
 
 ## Technology Stack
 
-| Component         | Technology                                                                                 |
-| ----------------- | ------------------------------------------------------------------------------------------ |
-| Language          | Rust (traits for contracts, strong typing, memory safety)                                  |
-| Manifests         | YAML/JSON + unit schemas                                                                   |
-| Execution         | Pluggable backends: CPU solvers, GPU kernels, ML emulators                                 |
-| Data processing   | GDAL, xarray, Zarr, COG                                                                    |
-| Orchestration     | Ray or Dask                                                                                |
-| Ontology          | In-memory property graph + serialized manifests; optional RDF/OWL                          |
-| Neural inference  | Graph transformer (PyTorch Geometric / DGL); process + error embeddings                    |
-| Collaboration     | A2A protocol                                                                               |
-| Diagnostics       | ILAMB, IOMB, E3SM Diagnostics                                                              |
-| ML learning       | PyTorch/JAX (FNO, DeepONet); PySR/gplearn; PINNs                                           |
-| Dashboard         | Next.js (App Router, WebSocket, Recharts/D3)                                               |
-| Event store       | SQLite (dev) / PostgreSQL (prod)                                                           |
-| NEO data          | JPL Horizons/CNEOS/Sentry, MPC, USAF/USSF feeds                                            |
-| Control systems   | MPC, PID, RL (PPO/SAC)                                                                     |
-| Evolution         | Trait-based models, quantitative genetics; PBDB, TimeTree                                  |
-| ALife / evolution | automaton-inspired process lifecycle; survival tiers, constitution, heartbeat, replication |
-| GPU acceleration  | wgpu 24.x, cudarc, NCCL; multi-GPU kernel dispatch                                         |
-| Neural operators  | NVIDIA Modulus (FNO, PINO, DeepONet, MeshGraphNet)                                         |
-| Foundation models | NVIDIA Earth-2/earth2studio (FourCastNet, Pangu-Weather, GraphCast, GenCast, CorrDiff)     |
-| Edge AI           | PhiSat-2-inspired autonomous observation; on-board anomaly detection                       |
+| Component         | Technology                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Core language     | Rust 2024 edition (traits for contracts, strong typing, memory safety)                   |
+| GPU compute       | wgpu 24.x (Vulkan/Metal/DX12); cudarc (CUDA); NCCL (multi-GPU collectives)               |
+| Process graph     | petgraph 0.7 directed graph with typed nodes/edges                                       |
+| Knowledgebase     | SQLite via rusqlite 0.32; BLAKE3 content-addressing                                      |
+| Async runtime     | Tokio 1.x (multi-threaded)                                                               |
+| REST API          | Axum 0.8 with WebSocket support; tower-http (CORS, tracing)                              |
+| Dashboard         | Next.js 15, React 19, ECharts 5.6, MapLibre GL JS 5.1, Tailwind CSS 4                    |
+| Neural inference  | Graph transformer (PyTorch Geometric / DGL)                                              |
+| Neural operators  | NVIDIA Modulus (FNO, PINO, DeepONet, MeshGraphNet)                                       |
+| Foundation models | NVIDIA Earth-2 / earth2studio (FourCastNet, Pangu-Weather, GraphCast, GenCast, CorrDiff) |
+| Edge AI           | PhiSat-2 principles; quantized INT8/INT4 classifiers for VPU/NPU deployment              |
+| ML learning       | PyTorch/JAX; PySR/gplearn; PINNs; mixed-precision (FP16/BF16)                            |
+| Data processing   | GDAL, xarray, Zarr, COG                                                                  |
+| Control systems   | MPC, PID, RL (PPO/SAC)                                                                   |
+| CLI               | clap 4.x with derive macros                                                              |
 
 ## Reference Models
 

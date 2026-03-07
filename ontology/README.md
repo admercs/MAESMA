@@ -1,6 +1,6 @@
 # MAESMA Unified Ontology
 
-This directory contains the unified ontology that governs all knowledge in the Modular Agentic Earth System Modeling Arena. Three interconnected knowledge domains — **Processes**, **Datasets**, and **Metrics** — are linked into a single queryable graph that agents use for model assembly, data acquisition, benchmarking, and autonomous self-improvement.
+This directory contains the unified ontology that governs all knowledge in MAESMA. Three interconnected knowledge domains — **Processes**, **Datasets**, and **Metrics** — are linked into a single queryable graph that agents use for model assembly, data acquisition, benchmarking, and autonomous self-improvement.
 
 ## Ontology Architecture
 

@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "MAESMA Dashboard",
   description:
-    "Modular Agentic Earth System Modeling Arena — Monitoring & Control",
+    "Agentic AI for Autonomous Earth System Observation, Model Discovery, and Simulation — Monitoring & Control",
 };
 
 export default function RootLayout({
