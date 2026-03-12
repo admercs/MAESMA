@@ -132,13 +132,10 @@ The Process Knowledgebase is the gravitational center of the MAESMA architecture
 
 The architecture follows a data-flow cycle:
 #set par(first-line-indent: 0em)
-+ Observations enter the knowledgebase via automated ingestion from STAC, CMR, NRT feeds, and PhiSat-2-style edge-AI filtered satellite streams. The Autonomous Observation Agent steers acquisition toward maximal information gain.
-+ Foundation weather models (Earth-2: FourCastNet, GraphCast, GenCast) generate rapid ensemble initial and boundary conditions on GPU.
-+ The neural inference engine queries the knowledgebase given current error signals, regime context, and compute budget.
-+ Agent proposals flow to the simulation runtime for execution on multi-GPU hardware.
++ Observations enter the knowledgebase via STAC, CMR, NRT feeds, and PhiSat-2-style edge-AI filtered satellite streams. Foundation weather models (Earth-2) generate rapid ensemble initial and boundary conditions on GPU.
++ The neural inference engine queries the knowledgebase given current error signals, regime context, and compute budget, and agent proposals flow to the simulation runtime for multi-GPU execution.
 + Errors and uncertainties from simulations drive the next inference cycle and update the observation value map.
-+ The process discovery pipeline learns new representations from persistent residuals --- using Modulus-trained neural operators --- and deposits them into the knowledgebase.
-+ Discovered representations evolve: the system recombines, mutates, and selects process operators via evolutionary search over the knowledgebase graph, treating the Pareto front as a fitness landscape.
++ The process discovery pipeline learns new representations from persistent residuals --- using Modulus-trained neural operators --- deposits them into the knowledgebase, and evolves them via crossover, mutation, and Pareto-optimal selection over the knowledgebase graph.
 + Every surviving representation is a living automaton: a heartbeat daemon evaluates survival tiers, enforces constitutional invariants, archives stagnant processes, and triggers self-replication for high-fitness candidates --- maintaining continuous selective pressure.
 #set par(first-line-indent: 1.5em)
 
@@ -461,7 +458,7 @@ The evolutionary history of all process representations is maintained as a _phyl
 
 MAESMA organizes process representations into 13 families, each with a _representation ladder_ of increasing fidelity (R0--R3, @tab:families): fire, hydrology, ecology, biogeochemistry, radiation, atmosphere, ocean, cryosphere, human systems, trophic dynamics, evolution, geomorphology, and geology.
 
-The agent swarm selects rungs per region and regime, following the salient-dynamics-first principle: dominant state-evolution drivers are resolved first, with lower-impact processes added incrementally. The neural inference engine proposes selections based on error patterns, and the Autonomous Optimizer maintains a Pareto frontier over skill versus computational cost. For the fire family, the landscape-scale R1 rung combines Rothermel surface fire rate-of-spread with the Canadian Forest Service Fire Behavior Prediction (CFS FBP) system for crown fire initiation and spread; more computationally intensive physics-based models (Balbi radiation-convection, level-set tracking, coupled fire--atmosphere) are reserved for R2/R3 where operational accuracy demands justify the cost.
+The agent swarm selects rungs per region and regime, following the salient-dynamics-first principle: dominant state-evolution drivers are resolved first, with lower-impact processes added incrementally. The neural inference engine proposes selections based on error patterns, and the Autonomous Optimizer maintains a Pareto frontier over skill versus computational cost.
 
 // ============================================================================
 = Geoengineering Feedback Control
@@ -627,18 +624,7 @@ The seed data initializes the knowledgebase graph from which the neural inferenc
 
 == Dashboard
 
-The monitoring dashboard is a Next.js 15 application with dark-themed UI, providing six primary views:
-
-#set par(first-line-indent: 0em)
-- *Knowledgebase Summary* --- Live manifest and skill record counts fetched from the REST API.
-- *Process Graph* --- ECharts force-directed graph rendering the SAPG with 13 process families as nodes and coupling edges, interactive drag-and-zoom.
-- *Skill Evolution* --- ECharts line chart tracking KGE improvement over autonomous benchmark iterations.
-- *Agent Status* --- Real-time agent state indicators (idle/active/running/watching) for all 25 agents.
-- *Pareto Front* --- ECharts scatter plot of skill (KGE) versus cost (GFLOP) for candidate process assemblies.
-- *Regime Map* --- MapLibre GL JS world map with GeoJSON regime polygons (boreal forest, tropical forest, savanna, tundra) and fire-prone overlay, supporting click-to-inspect per region.
-#set par(first-line-indent: 1.5em)
-
-The dashboard proxies all API calls to the Rust server on port 3001. It is observe-only by design: monitoring never blocks the autonomous workflow. An optional steering panel allows objective/weight/budget adjustments that take effect on the next cycle.
+The monitoring dashboard is a Next.js 15 application providing six primary views: knowledgebase summary (live counts), process graph (ECharts force-directed SAPG visualization), skill evolution (KGE time-series), agent status (real-time state for all 25 agents), Pareto front (skill vs. cost scatter), and regime map (MapLibre GL JS with GeoJSON regime polygons). The dashboard proxies API calls to the Rust server on port 3001. It is observe-only by design: monitoring never blocks the autonomous workflow. An optional steering panel allows objective/weight/budget adjustments that take effect on the next cycle.
 
 // ============================================================================
 = Design Principles

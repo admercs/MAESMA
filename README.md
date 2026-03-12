@@ -102,7 +102,7 @@ All layers run concurrently and continuously. The strategic loop never terminate
 │                                    │ proposals                           │
 │                                    ▼                                     │
 │  ┌─────────────┐    ┌──────────────────────────────┐    ┌─────────────┐ │
-│  │   PROCESS   │◄───┤       AGENT SWARM (22)       ├───►│  SIMULATION │ │
+│  │   PROCESS   │◄───┤       AGENT SWARM (25)       ├───►│  SIMULATION │ │
 │  │  DISCOVERY  │    │                              │    │   RUNTIME   │ │
 │  │  PIPELINE   │    │  Assemble, compile, execute, │    │             │ │
 │  │             │    │  benchmark, score, calibrate  │    │  Multi-GPU  │ │
@@ -549,32 +549,32 @@ EXTINCTION TRIGGER
 
 ### RGMA — Regional & Global Model Analysis
 
-| Thrust                   | Capability                                                                 |
-| ------------------------ | -------------------------------------------------------------------------- |
-| Cloud processes          | Atmosphere + radiation ladders; A2A federation with cloud-resolving models |
-| Biogeochemical feedbacks | Multi-rung biogeochem coupled to hydrology + ecology; factorial experiments|
-| High-latitude            | Permafrost, ice-sheet, sea-ice rungs; Arctic regime tags                   |
-| Variability & change     | Multi-decadal hindcasts with BMA; ensemble weighting                       |
-| Extreme events           | Event-driven embedding; high-fidelity solvers                              |
-| Water cycle              | Multi-rung hydrology + routing + snow + human water management             |
-| Model hierarchy          | Representation ladders are a model hierarchy                               |
-| Uncertainty              | Bayesian structural learning; CRPS; information-loss tracking              |
-| Benchmarking             | Ontology + Skill Store + Benchmarking Agent                                |
-| Petascale data           | Zarr/COG; MPAS unstructured mesh                                           |
+| Thrust                   | Capability                                                                  |
+| ------------------------ | --------------------------------------------------------------------------- |
+| Cloud processes          | Atmosphere + radiation ladders; A2A federation with cloud-resolving models  |
+| Biogeochemical feedbacks | Multi-rung biogeochem coupled to hydrology + ecology; factorial experiments |
+| High-latitude            | Permafrost, ice-sheet, sea-ice rungs; Arctic regime tags                    |
+| Variability & change     | Multi-decadal hindcasts with BMA; ensemble weighting                        |
+| Extreme events           | Event-driven embedding; high-fidelity solvers                               |
+| Water cycle              | Multi-rung hydrology + routing + snow + human water management              |
+| Model hierarchy          | Representation ladders are a model hierarchy                                |
+| Uncertainty              | Bayesian structural learning; CRPS; information-loss tracking               |
+| Benchmarking             | Ontology + Skill Store + Benchmarking Agent                                 |
+| Petascale data           | Zarr/COG; MPAS unstructured mesh                                            |
 
 ### MSD — MultiSector Dynamics
 
-| Focus                 | Capability                                        |
-| --------------------- | ------------------------------------------------- |
-| Energy                | Supply/demand, grid, generation, storage          |
-| Resources             | Coupled hydrology + ecology + human extraction    |
-| Infrastructure        | Power grid, water systems, cascading failure       |
-| Water–energy–land     | Cross-family coupling with conservative exchange   |
-| Supply chains         | Commodity flow, trade routes                       |
-| Land use              | Transition matrices, urbanization feedback         |
-| Compounding stressors | Event embedding + MSD coupling                    |
-| Scenario discovery    | Active Learning + Optimizer; tipping points       |
-| Digital testbeds      | Compile-and-adapt: region → coupled model         |
+| Focus                 | Capability                                       |
+| --------------------- | ------------------------------------------------ |
+| Energy                | Supply/demand, grid, generation, storage         |
+| Resources             | Coupled hydrology + ecology + human extraction   |
+| Infrastructure        | Power grid, water systems, cascading failure     |
+| Water–energy–land     | Cross-family coupling with conservative exchange |
+| Supply chains         | Commodity flow, trade routes                     |
+| Land use              | Transition matrices, urbanization feedback       |
+| Compounding stressors | Event embedding + MSD coupling                   |
+| Scenario discovery    | Active Learning + Optimizer; tipping points      |
+| Digital testbeds      | Compile-and-adapt: region → coupled model        |
 
 ## A2A Federation
 
