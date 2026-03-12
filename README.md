@@ -370,7 +370,12 @@ Posterior $p(M_k | \mathbf{y}) \propto p(\mathbf{y} | M_k) \, p(M_k)$ over model
 
 ### Ontology Feedback
 
-Each simulation updates: skill models (empirical posteriors replace expert priors), cost models (actual walltime/memory), compatibility constraints, default rung preferences, regime tags, and parameter priors.
+Each simulation updates:
+
+- Skill models — empirical posteriors replace expert priors
+- Cost models — actual walltime and memory
+- Compatibility constraints and default rung preferences
+- Regime tags and parameter priors
 
 ### Process Discovery Pipeline
 
@@ -547,12 +552,12 @@ EXTINCTION TRIGGER
 | Thrust                   | Capability                                                                 |
 | ------------------------ | -------------------------------------------------------------------------- |
 | Cloud processes          | Atmosphere + radiation ladders; A2A federation with cloud-resolving models |
-| Biogeochemical feedbacks | B0–B2 coupled to hydrology + ecology; factorial experiments                |
-| High-latitude            | C0–C2: permafrost, ice-sheet, sea-ice; Arctic regime tags                  |
+| Biogeochemical feedbacks | Multi-rung biogeochem coupled to hydrology + ecology; factorial experiments|
+| High-latitude            | Permafrost, ice-sheet, sea-ice rungs; Arctic regime tags                   |
 | Variability & change     | Multi-decadal hindcasts with BMA; ensemble weighting                       |
 | Extreme events           | Event-driven embedding; high-fidelity solvers                              |
-| Water cycle              | H0–H2 + routing + snow + human water management                            |
-| Model hierarchy          | Representation ladders ARE a model hierarchy                               |
+| Water cycle              | Multi-rung hydrology + routing + snow + human water management             |
+| Model hierarchy          | Representation ladders are a model hierarchy                               |
 | Uncertainty              | Bayesian structural learning; CRPS; information-loss tracking              |
 | Benchmarking             | Ontology + Skill Store + Benchmarking Agent                                |
 | Petascale data           | Zarr/COG; MPAS unstructured mesh                                           |
@@ -561,12 +566,12 @@ EXTINCTION TRIGGER
 
 | Focus                 | Capability                                        |
 | --------------------- | ------------------------------------------------- |
-| Energy                | HS1/HS2: supply/demand, grid, generation, storage |
+| Energy                | Supply/demand, grid, generation, storage          |
 | Resources             | Coupled hydrology + ecology + human extraction    |
-| Infrastructure        | HS2: power grid, water systems, cascading failure |
-| Water–energy–land     | H↔E↔HS coupling with conservative exchange        |
-| Supply chains         | HS2/HS3: commodity flow, trade routes             |
-| Land use              | HS1+: transition matrices, urbanization feedback  |
+| Infrastructure        | Power grid, water systems, cascading failure       |
+| Water–energy–land     | Cross-family coupling with conservative exchange   |
+| Supply chains         | Commodity flow, trade routes                       |
+| Land use              | Transition matrices, urbanization feedback         |
 | Compounding stressors | Event embedding + MSD coupling                    |
 | Scenario discovery    | Active Learning + Optimizer; tipping points       |
 | Digital testbeds      | Compile-and-adapt: region → coupled model         |
@@ -631,7 +636,7 @@ EXTINCTION TRIGGER
 4. **Execute** — Run sub-models remotely or colocate; exchange boundary conditions
 5. **Share** — Skill records flow back via A2A; federated learning without raw data
 
-Cross-instance skill sharing: anonymized records (config hash + metrics only), trust-weighted Bayesian incorporation, differential privacy safeguards. Over time, the community builds a distributed posterior over model structures.
+Cross-instance skill sharing uses anonymized records (config hash + metrics only), trust-weighted Bayesian incorporation, and differential privacy safeguards. Over time, the community builds a distributed posterior over model structures.
 
 ## Monitoring Dashboard
 

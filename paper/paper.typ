@@ -277,29 +277,37 @@ This paradigm transforms the traditional workflow --- where errors prompt manual
 = Agent Swarm
 // ============================================================================
 
-MAESMA deploys 25 specialized agents that collectively own the full model lifecycle. Key agents include:
+MAESMA deploys 25 specialized agents organized across its three control layers. Each agent has a single responsibility and communicates through the shared knowledgebase and event bus. We describe the most architecturally significant agents below, grouped by function.
 
-*Knowledgebase Retrieval Agent.* Queries the Process Knowledgebase via the neural inference engine. Given current error fields, scale requirements, regime context, and compute budget, it retrieves and ranks candidate process representations by estimated salience --- the expected improvement in system state evolution per unit cost --- ensuring the most dynamically important processes are selected first.
+=== Reasoning and Selection
+
+*Knowledgebase Retrieval Agent.* Queries the Process Knowledgebase via the neural inference engine. Given current error fields, scale requirements, regime context, and compute budget, it retrieves and ranks candidate process representations by estimated salience --- the expected improvement in system state evolution per unit cost.
 
 *Model Assembly Agent.* Constructs candidate Scale-Aware Process Graphs from inference engine proposals. Selects rungs per family, declares state variable embeddings, and proposes coupling cadences.
+
+*Model Selection Agent.* Maintains Bayesian posteriors $p(M_k | bold(y)) prop p(bold(y) | M_k) p(M_k)$ over model structures. Uses marginal likelihoods with automatic Occam's razor. Produces Bayesian Model Averaging ensembles.
+
+*Autonomous Optimizer Agent.* Runs the continuous fitness-driven Pareto selection loop: queries the knowledgebase via neural inference $arrow.r$ computes fitness $arrow.r$ updates Pareto frontier $arrow.r$ swaps dominant rungs $arrow.r$ delegates uncertain configurations to Active Learning.
+
+=== Validation and Scoring
 
 *Closure & Consistency Agent.* Validates that assembled SAPGs satisfy unit consistency, state-space closure, conservation compatibility, boundary condition consistency, and numerical stability constraints.
 
 *Benchmarking Agent.* Executes candidate configurations against observations and computes multi-metric skill scores (RMSE, KGE, CRPS, conservation residuals, timing errors).
 
-*Model Selection Agent.* Maintains Bayesian posteriors $p(M_k | bold(y)) prop p(bold(y) | M_k) p(M_k)$ over model structures. Uses marginal likelihoods with automatic Occam's razor. Produces Bayesian Model Averaging ensembles.
+=== Discovery and Data
 
-*Autonomous Optimizer Agent.* Runs the continuous fitness-driven Pareto selection loop. Per-region, per-regime: queries the knowledgebase via neural inference $arrow.r$ computes fitness $arrow.r$ updates Pareto frontier $arrow.r$ swaps dominant rungs $arrow.r$ delegates uncertain configurations to Active Learning.
+*Process Discovery Agent.* Detects persistent structured biases, learns new representations via neural operators (FNO, DeepONet), symbolic regression (PySR), or physics--ML hybrids, validates them against multi-criteria gates, and deposits validated representations into the knowledgebase.
 
-*Process Discovery Agent.* Detects persistent structured biases, learns new representations via neural operators (FNO, DeepONet), symbolic regression (PySR), or physics--ML hybrids, validates them against multi-criteria gates, and deposits validated representations into the knowledgebase with full manifest and provenance.
+*Data Scout Agent.* Searches STAC, CMR, CKAN, and Copernicus Data Space catalogs for new observation products. Scores relevance and novelty using the observation value map. Coordinates edge-AI filtered streams from PhiSat-2-class satellites.
 
-*Data Scout Agent.* Searches STAC, CMR, CKAN, and Copernicus Data Space catalogs for new observation products. Scores relevance and novelty using the observation value map maintained by the Autonomous Observation Agent. Coordinates edge-AI filtered streams from PhiSat-2-class satellites. Triggers re-scoring of affected representations upon ingestion.
+*Foundation Model Agent.* Manages the Earth-2 foundation weather model zoo. Selects, configures, and executes pre-trained models (FourCastNet, Pangu-Weather, GraphCast, GenCast, DLWP) as Atmosphere R0/R1 rungs or ensemble initial-condition generators.
+
+*Autonomous Observation Agent.* Maintains the observation value map (spatiotemporal marginal information gain), issues active tasking requests to programmable platforms (satellite operators, UAV fleets, sensor networks), and deploys edge-AI classifiers for on-board filtering.
+
+=== Collaboration
 
 *A2A Gateway Agent.* Manages inter-institutional federation: peer discovery via Agent Cards, task lifecycle management, artifact exchange (IR fragments, skill records, manifests), and authentication.
-
-*Foundation Model Agent.* Manages the Earth-2 foundation weather model zoo. Selects, configures, and executes pre-trained models (FourCastNet, Pangu-Weather, GraphCast, GenCast, DLWP) as Atmosphere R0/R1 rungs or ensemble initial-condition generators. Monitors model zoo for new releases, benchmarks against reanalysis, and registers new foundation models as knowledgebase entries with skill records. Routes ensemble spread to downstream process families as boundary conditions.
-
-*Autonomous Observation Agent.* Implements the PhiSat-2-inspired observation intelligence layer. Maintains the observation value map (spatiotemporal marginal information gain), issues active tasking requests to programmable platforms (satellite operators, UAV fleets, sensor networks), deploys edge-AI classifiers for on-board filtering, and routes high-value observations to the knowledgebase. Coordinates with the Data Scout for catalog search and with the Active Learning Agent for experiment-driven acquisition.
 
 // ============================================================================
 = Autonomous Optimization Loop
@@ -533,13 +541,13 @@ Over time, the community builds a distributed posterior over model structures wi
 = DOE EESM Alignment
 // ============================================================================
 
-MAESMA is designed to span all three DOE Earth and Environmental System Modeling program areas:
+MAESMA spans all three DOE Earth and Environmental System Modeling program areas:
 
-*ESMD (Earth System Model Development).* The SAPG compiler with conservation-checked coupling, scale-aware representation ladders from coarse to convection-permitting, multi-GPU execution with pluggable backends, and human systems as first-class process families (HS0--HS3) address ESMD priorities in water/drought/extremes, cloud--aerosol interactions, and exascale readiness.
+*ESMD (Earth System Model Development).* Conservation-checked coupling via the SAPG compiler, scale-aware representation ladders, multi-GPU execution, and human systems as first-class process families address ESMD priorities in water/drought/extremes, cloud--aerosol interactions, and exascale readiness.
 
-*RGMA (Regional & Global Model Analysis).* The ontology-indexed Skill Score Store, benchmarking agent with ILAMB/IOMB/E3SM Diagnostics integration, Bayesian structural learning with CRPS and information-loss tracking, and representation ladders serving as explicit model hierarchies address RGMA thrusts in process understanding, uncertainty quantification, and petascale data analysis.
+*RGMA (Regional & Global Model Analysis).* The ontology-indexed Skill Score Store with ILAMB/IOMB/E3SM Diagnostics integration, Bayesian structural learning, and representation ladders as explicit model hierarchies address RGMA thrusts in process understanding, uncertainty quantification, and petascale data analysis.
 
-*MSD (MultiSector Dynamics).* Bidirectional natural--human system coupling, agent-based infrastructure modeling at county/hourly resolution, AI-driven scenario discovery with tipping point identification, and autonomous compounding stressor analysis address MSD priorities in water--energy--land nexus dynamics, supply chain disruption, and digital testbed construction.
+*MSD (MultiSector Dynamics).* Bidirectional natural--human system coupling, agent-based infrastructure modeling, AI-driven scenario discovery with tipping point identification, and autonomous compounding stressor analysis address MSD priorities in water--energy--land nexus dynamics and digital testbed construction.
 
 // ============================================================================
 = Monitoring and Steering
@@ -663,15 +671,15 @@ MAESMA is governed by a set of design principles. We highlight the most distinct
 
 MAESMA represents a paradigm shift from _human-configured_ to _agent-discovered_ Earth system models. Several aspects merit discussion.
 
-*Scalability of the knowledgebase.* As the number of process representations, skill records, and ontological relations grows, the computational cost of neural inference over the full knowledgebase graph increases. We address this through incremental retraining, graph sampling strategies during inference, and hierarchical attention that first selects relevant process families before attending to individual representations.
+*Scalability.* As the knowledgebase grows, the cost of neural inference over the full graph increases. Incremental retraining, graph sampling, and hierarchical attention --- first selecting relevant process families, then attending to individual representations --- keep inference tractable.
 
-*Trust in discovered processes.* Representations discovered from data carry inherent risks: overfitting to training domains, violation of conservation in unseen regimes, and lack of physical interpretability. The multi-criteria validation gate (conservation, stability, generalization, sensitivity) and the lifecycle management system ($"candidate" arrow.r "provisional" arrow.r "validated" arrow.r "production"$) with periodic re-validation mitigate these risks. Provenance tracking ensures that every discovered representation can be traced to its motivating residual analysis, training data, and validation history.
+*Trust in discovered processes.* Data-driven representations carry risks: overfitting, conservation violations in unseen regimes, and limited interpretability. The multi-criteria validation gate ($"candidate" arrow.r "provisional" arrow.r "validated" arrow.r "production"$) with periodic re-validation and full provenance tracking mitigate these risks.
 
-*Human oversight.* While MAESMA is designed for human-out-of-loop operation, the dashboard and optional steering panel ensure that humans retain the ability to inspect, understand, and redirect the system's behavior. The observe-only constraint on monitoring prevents humans from inadvertently blocking the autonomous workflow while preserving their ability to adjust high-level objectives.
+*Human oversight.* The dashboard and optional steering panel preserve human ability to inspect and redirect the system without blocking the autonomous workflow.
 
-*Federation trust.* The A2A protocol introduces trust considerations: how should a MAESMA instance weight skill records from an unfamiliar peer? Trust-weighted Bayesian incorporation with differential privacy safeguards provides a principled framework, but the dynamics of trust in a growing federation of heterogeneous instances remain an open research question.
+*Federation trust.* Trust-weighted Bayesian incorporation with differential privacy safeguards provides a principled framework for weighting skill records from unfamiliar peers, but the dynamics of trust in a growing federation remain an open question.
 
-*ALife dynamics and emergent behavior.* Treating process representations as living automatons under evolutionary pressure introduces dynamics familiar from artificial life research: population crashes when regime shifts invalidate dominant lineages, arms races between competing representations in overlapping niches, speciation events that fragment previously unified populations, and potential for runaway self-replication of cheaply computable but marginally skillful processes. The constitutional invariants (especially "earn existence" via skill-to-cost ratio) and the heartbeat daemon's continuous evaluation provide safeguards, but the long-term population dynamics of an unbounded ALife process ecosystem remain an empirical question that only sustained deployment can answer.
+*ALife dynamics.* Evolutionary pressure on process populations introduces familiar ALife phenomena: population crashes when regime shifts invalidate dominant lineages, arms races in overlapping niches, and potential for runaway self-replication of cheap but marginally skillful processes. Constitutional invariants and the heartbeat daemon provide safeguards, but the long-term dynamics of an unbounded ALife ecosystem remain empirical.
 
 // ============================================================================
 = Conclusion
