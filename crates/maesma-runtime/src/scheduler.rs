@@ -46,7 +46,11 @@ impl Scheduler {
         self.current_time += self.schedule.dt_global;
         state.advance_time(self.schedule.dt_global);
 
-        info!(step = self.current_step, time = self.current_time, "Global step");
+        info!(
+            step = self.current_step,
+            time = self.current_time,
+            "Global step"
+        );
 
         // Clone stage metadata so we can borrow runners mutably inside the loop.
         let stages: Vec<_> = self

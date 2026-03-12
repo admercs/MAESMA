@@ -78,7 +78,9 @@ impl SimulationState {
 
     /// Check if any field contains NaN values.
     pub fn has_nan(&self) -> bool {
-        self.fields.values().any(|arr| arr.iter().any(|v| v.is_nan()))
+        self.fields
+            .values()
+            .any(|arr| arr.iter().any(|v| v.is_nan()))
     }
 
     /// Check if any field contains infinite values.

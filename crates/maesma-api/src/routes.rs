@@ -1,11 +1,11 @@
 //! Route handlers for the MAESMA API.
 
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
-    Json,
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 use crate::state::AppState;
 
@@ -93,9 +93,7 @@ pub async fn get_sapg(State(state): State<AppState>) -> Result<Json<Value>, Stat
 
     let nodes: Vec<Value> = manifests
         .iter()
-        .map(|(id, name, family)| {
-            json!({ "id": id, "label": name, "family": family })
-        })
+        .map(|(id, name, family)| json!({ "id": id, "label": name, "family": family }))
         .collect();
 
     Ok(Json(json!({
