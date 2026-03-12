@@ -68,25 +68,15 @@
 
 #align(center)[
   #v(0.5in)
-  #text(size: 17pt, weight: "bold")[
-    #paper-title
-  ]
+  #text(size: 17pt, weight: "bold")[#paper-title]
   #v(1.5em)
-  #text(size: 12pt)[
-    #paper-author
-  ]
-  #v(0.4em)
-  #text(size: 11pt, style: "italic")[
-    #paper-affiliation
-  ]
+  #text(size: 12pt)[#paper-author]
+  #v(0.3em)
+  #text(size: 10pt, style: "italic")[#paper-affiliation]
   #v(0.2em)
-  #text(size: 11pt, fill: luma(80))[
-    #paper-email
-  ]
-  #v(0.4em)
-  #text(size: 11pt)[
-    #paper-date.display("[month repr:long] [day], [year]")
-  ]
+  #text(size: 10pt)[#raw(paper-email)]
+  #v(0.5em)
+  #text(size: 10pt)[#paper-date.display("[month repr:long] [day], [year]")]
   #v(1.5em)
 ]
 
@@ -2718,6 +2708,8 @@ The expanded FATES catalog totals *90 process entries* across 7 process families
   caption: [iLand process catalog (21 entries). Primary families: Ecology (14), Biogeochem (4), Hydrology (2), Fire (1).],
 ) <tab:iland>
 
+#pagebreak()
+
 = Landlab --- Earth Surface Dynamics Toolkit <app:landlab>
 
 Landlab provides a modular Python toolkit with 55+ components for geomorphology, hydrology, and landscape evolution research.
@@ -2889,6 +2881,8 @@ Landlab provides a modular Python toolkit with 55+ components for geomorphology,
   caption: [LPJ-GUESS process catalog (18 entries). Primary families: Biogeochem (8), Ecology (4), Human Sys (3), Fire (2), Hydrology (1).],
 ) <tab:lpjguess>
 
+#pagebreak()
+
 = Noah-MP --- Multi-Physics Land Surface Model <app:noahmp>
 
 Noah-MP's defining feature is offering multiple scheme options for each physical process, enabling systematic evaluation of structural uncertainty.
@@ -2990,6 +2984,8 @@ Noah-MP's defining feature is offering multiple scheme options for each physical
   ),
   caption: [Noah-MP process catalog (32 entries). Multi-physics options yield ~70 distinct parameterization combinations.],
 ) <tab:noahmp>
+
+#pagebreak()
 
 = ParFlow --- Integrated Hydrological Model <app:parflow>
 
