@@ -4,6 +4,13 @@
 
 <h3 align="center">Agentic AI for Autonomous Earth System Observation, Model Discovery, and Simulation</h3>
 
+<p align="center">
+  <a href="https://github.com/admercs/MAESMA/actions/workflows/ci.yml"><img src="https://github.com/admercs/MAESMA/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
+  <a href="https://github.com/admercs/MAESMA/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License"></a>
+  <img src="https://img.shields.io/badge/rust-nightly%202024-orange.svg" alt="Rust">
+  <img src="https://img.shields.io/badge/typst-paper-purple.svg" alt="Typst">
+</p>
+
 MAESMA is an agentic AI system that autonomously discovers, assembles, benchmarks, selects, and invents Earth system model configurations. At its center lies a versioned **Process Knowledgebase** — the single store of all process models, manifests, ontological metadata, and skill records. A 25-agent swarm reasons over this knowledgebase via a **neural inference engine** (graph transformer), proposing process selections driven by simulation errors and uncertainties. Process models are treated as **living organisms**: they compete for compute, earn survival through predictive skill, replicate via mutation and crossover, and face extinction when stagnant — an artificial life framework for autonomous model construction.
 
 ## Key Ideas
@@ -38,6 +45,37 @@ MAESMA is an agentic AI system that autonomously discovers, assembles, benchmark
 - **Geoengineering control** — 14 intervention types with closed-loop MPC, termination shock analysis, and tipping point avoidance
 - **Planetary defense** — All mass extinction drivers modeled and calibrated against 13 historical events spanning 2.4 billion years
 - **Full DOE EESM coverage** — ESMD, RGMA, MSD program areas
+
+## Quickstart
+
+```bash
+# Build
+cargo build
+
+# Initialize a knowledgebase (seeds ~50 process manifests)
+cargo run -- init
+
+# List all process manifests
+cargo run -- kb list
+
+# Show knowledgebase statistics
+cargo run -- kb stats
+
+# Export the knowledgebase to JSON
+cargo run -- kb export -o kb.json
+
+# Validate a SAPG configuration
+cargo run -- validate -c sapg.json
+
+# Run a simulation (365 daily timesteps)
+cargo run -- run -c sapg.json -s 365
+
+# Start the API server (default port 3001)
+cargo run -- serve
+
+# Start the dashboard (requires Node.js)
+cd dashboard && npm install && npm run dev
+```
 
 ## Architecture
 
@@ -773,4 +811,4 @@ Available in `reference/` for study: CESM, E3SM, WRF-SFIRE, ParFlow, iLand, FATE
 
 ## License
 
-TBD
+Apache-2.0

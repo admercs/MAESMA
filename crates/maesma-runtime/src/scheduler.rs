@@ -1,11 +1,14 @@
 //! Task scheduler — executes the compiled SAPG schedule.
 
+use std::collections::HashMap;
+
 use maesma_compiler::schedule::ExecutionSchedule;
+use maesma_core::process::{ProcessId, ProcessRunner};
 use tracing::info;
 
 use crate::events::EventBus;
 use crate::health::HealthMonitor;
-use crate::state::SimulationState;
+use crate::state::{ProcessStateAdapter, SimulationState};
 
 /// The simulation scheduler.
 pub struct Scheduler {
@@ -13,6 +16,8 @@ pub struct Scheduler {
     current_step: u64,
     current_time: f64,
     health: HealthMonitor,
+    /// Registered process runners, keyed by ProcessId.
+    runners: HashMap<ProcessId, Box<dyn ProcessRunner>>,
 }
 
 impl Scheduler {
@@ -22,7 +27,13 @@ impl Scheduler {
             current_step: 0,
             current_time: 0.0,
             health: HealthMonitor::new(),
+            runners: HashMap::new(),
         }
+    }
+
+    /// Register a process runner for a given process ID.
+    pub fn register_runner(&mut self, id: ProcessId, runner: Box<dyn ProcessRunner>) {
+        self.runners.insert(id, runner);
     }
 
     /// Advance the simulation by one global timestep.
@@ -33,14 +44,26 @@ impl Scheduler {
     ) -> maesma_core::Result<()> {
         self.current_step += 1;
         self.current_time += self.schedule.dt_global;
+        state.advance_time(self.schedule.dt_global);
 
         info!(step = self.current_step, time = self.current_time, "Global step");
 
-        for stage in &self.schedule.stages {
-            for _sub in 0..stage.sub_steps {
-                for _pid in &stage.processes {
-                    // TODO: dispatch to actual ProcessRunner implementations
-                    // For now, this is a scheduling skeleton.
+        // Clone stage metadata so we can borrow runners mutably inside the loop.
+        let stages: Vec<_> = self
+            .schedule
+            .stages
+            .iter()
+            .map(|s| (s.dt, s.sub_steps, s.processes.clone()))
+            .collect();
+
+        for (dt, sub_steps, pids) in &stages {
+            for _sub in 0..*sub_steps {
+                for pid in pids {
+                    if let Some(runner) = self.runners.get_mut(pid) {
+                        let mut adapter = ProcessStateAdapter::new(state);
+                        runner.step(&mut adapter, *dt)?;
+                        adapter.sync_back();
+                    }
                 }
             }
         }
@@ -48,7 +71,6 @@ impl Scheduler {
         // Process any pending events
         while let Some(event) = event_bus.poll() {
             info!(event = ?event.kind, "Processing event");
-            // TODO: dispatch event to relevant process runners
         }
 
         // Health check
@@ -77,5 +99,10 @@ impl Scheduler {
 
     pub fn current_time(&self) -> f64 {
         self.current_time
+    }
+
+    /// Number of registered runners.
+    pub fn runner_count(&self) -> usize {
+        self.runners.len()
     }
 }

@@ -45,7 +45,53 @@ pub enum AgentRole {
     AutonomousObservation,
 }
 
-/// Context passed to agents on each invocation.
+impl AgentRole {
+    /// All agent roles.
+    pub fn all() -> &'static [Self] {
+        &[
+            Self::KbRetrieval, Self::Assembly, Self::ClosureValidator,
+            Self::Benchmarking, Self::Selection, Self::Optimizer,
+            Self::Discovery, Self::DataScout, Self::A2aGateway,
+            Self::RegimeDetector, Self::ScaleNegotiator, Self::Provenance,
+            Self::SalientDynamics, Self::Ensemble, Self::Diagnostics,
+            Self::Sensitivity, Self::Hypothesis, Self::Geoengineering,
+            Self::PlanetaryDefense, Self::Trophic, Self::Evolution,
+            Self::MetaLearner, Self::RuntimeSentinel, Self::FoundationModel,
+            Self::AutonomousObservation,
+        ]
+    }
+
+    /// Human-readable description of the role.
+    pub fn description(&self) -> &'static str {
+        match self {
+            Self::KbRetrieval => "Retrieves process representations from the knowledgebase",
+            Self::Assembly => "Assembles SAPG configurations from available processes",
+            Self::ClosureValidator => "Validates conservation and closure properties",
+            Self::Benchmarking => "Benchmarks process representations against observations",
+            Self::Selection => "Selects optimal representations via multi-criteria analysis",
+            Self::Optimizer => "Tunes process parameters to improve skill metrics",
+            Self::Discovery => "Discovers new process representations from residuals",
+            Self::DataScout => "Locates and ingests observational datasets",
+            Self::A2aGateway => "Manages agent-to-agent federation with peers",
+            Self::RegimeDetector => "Detects environmental regime shifts",
+            Self::ScaleNegotiator => "Negotiates spatial/temporal scale compatibility",
+            Self::Provenance => "Tracks full lineage and provenance of decisions",
+            Self::SalientDynamics => "Identifies dynamically important processes",
+            Self::Ensemble => "Manages ensemble runs and uncertainty quantification",
+            Self::Diagnostics => "Generates diagnostic reports and visualizations",
+            Self::Sensitivity => "Performs sensitivity analysis on SAPG configurations",
+            Self::Hypothesis => "Generates and tests scientific hypotheses",
+            Self::Geoengineering => "Evaluates geoengineering intervention scenarios",
+            Self::PlanetaryDefense => "Monitors planetary-scale environmental threats",
+            Self::Trophic => "Manages trophic web interactions and food chains",
+            Self::Evolution => "Drives ALife-based evolution of process populations",
+            Self::MetaLearner => "Learns meta-strategies from cross-domain experience",
+            Self::RuntimeSentinel => "Monitors runtime health and detects anomalies",
+            Self::FoundationModel => "Orchestrates foundation model inference",
+            Self::AutonomousObservation => "Controls autonomous observation platforms",
+        }
+    }
+}
 pub struct AgentContext {
     /// Arbitrary key-value parameters.
     pub params: HashMap<String, serde_json::Value>,

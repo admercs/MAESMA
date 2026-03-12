@@ -652,6 +652,32 @@ MAESMA is governed by a set of design principles. We highlight the most distinct
 #set par(first-line-indent: 1.5em)
 
 // ============================================================================
+= Related Work
+// ============================================================================
+
+Several threads of prior work converge in the MAESMA design. We survey the most relevant areas and position MAESMA within each.
+
+== Earth System Model Construction
+
+Community models such as CESM (Hurrell et al., 2013), E3SM (Golaz et al., 2019), and GFDL-ESM4 (Dunne et al., 2020) have established component-coupling frameworks (CIME, MCT, MOAB) that allow researchers to swap atmosphere, ocean, land, and ice components. MAESMA extends this paradigm from _human-selected component sets_ to _agent-discovered process sets_ at arbitrary fidelity, with the knowledgebase replacing static configuration files. Modular process-based models in fire (FATES, Prometheus), hydrology (ParFlow, VIC, Noah-MP), and ecology (LPJ-GUESS, iLand) provide many of the initial knowledgebase entries, but in MAESMA these are first-class automata competing for survival rather than fixed components.
+
+== AI for Scientific Discovery
+
+Neural operator surrogates --- Fourier Neural Operators (Li et al., 2021), Physics-Informed Neural Operators (Li et al., 2023), DeepONet (Lu et al., 2021), and MeshGraphNet (Pfaff et al., 2021) --- have demonstrated order-of-magnitude speedups for PDE-governed dynamics. Foundation weather models (Pangu-Weather, FourCastNet, GraphCast, GenCast) push this further. MAESMA treats these as fidelity rungs within the process representation ladder; an agent selects them when atmospheric dynamics are not salient, freeing GPU budget for other families. Unlike standalone emulator projects, MAESMA embeds learned surrogates into a full-stack ESM where they must satisfy conservation, coupling, and double-counting constraints.
+
+== Multi-Agent Scientific Workflows
+
+Agentic AI frameworks (AutoGPT, MetaGPT, CAMEL) have explored LLM-based multi-agent collaboration, but typically for software engineering or question-answering. Scientific multi-agent systems are rarer: IBM's SciAgents (Ghafarollahi et al., 2024) uses multi-agent reasoning for materials design, while ChemCrow (Bran et al., 2024) deploys tool-augmented agents for chemistry. MAESMA differs in that agents operate over a _structured knowledgebase_ with typed manifests and formal validation constraints rather than free-form text, and in that the agent swarm is permanent --- running indefinitely, accumulating knowledge, and never resetting context.
+
+== AutoML and Neural Architecture Search
+
+AutoML (Hutter et al., 2019) and neural architecture search (Zoph and Le, 2017) automate model selection and hyperparameter tuning. MAESMA's optimization loop is structurally similar but operates at a coarser grain --- swapping entire process representations (ODE systems, empirical closures, neural surrogates) rather than individual layers --- and adds physics-informed constraints (conservation, closure, double-counting) absent from standard AutoML. The Pareto-based selection across accuracy, cost, and conservation dimensions extends multi-objective NAS (Lu et al., 2019) to scientific simulation.
+
+== Artificial Life and Evolutionary Computation
+
+MAESMA's ALife framework draws on open-ended evolution (Stanley and Lehman, 2019), artificial ecologies (Ray, 1991), and quality-diversity algorithms (Pugh et al., 2016). Treating process representations as organisms subject to birth, death, mutation, and crossover is closest in spirit to the Tierra system (Ray, 1991) and Avida (Ofria and Wilke, 2004), but applied to scientific model components rather than self-replicating programs. The constitutional invariants (conservation, thermodynamic consistency, dimensional correctness) serve as hard constraints that evolutionary operators must preserve, analogous to the physical laws of an artificial chemistry.
+
+// ============================================================================
 = Discussion
 // ============================================================================
 

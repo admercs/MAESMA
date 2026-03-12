@@ -1014,8 +1014,10 @@ name = "maesma-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "axum",
  "clap",
  "maesma-agents",
+ "maesma-api",
  "maesma-compiler",
  "maesma-core",
  "maesma-federation",
@@ -1112,6 +1114,7 @@ dependencies = [
 name = "maesma-runtime"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "maesma-compiler",
  "maesma-core",
  "ndarray",

@@ -14,4 +14,4 @@ pub use events::{Event, EventBus};
 pub use health::HealthMonitor;
 pub use heartbeat::{HeartbeatDaemon, HeartbeatOutcome};
 pub use scheduler::Scheduler;
-pub use state::SimulationState;
+pub use state::{ProcessStateAdapter, SimulationState};

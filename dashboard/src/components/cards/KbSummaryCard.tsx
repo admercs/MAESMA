@@ -5,12 +5,16 @@ import { useEffect, useState } from "react";
 interface KbStats {
   manifests: number;
   skill_records: number;
+  families: number;
+  fidelity_rungs: number;
 }
 
 export function KbSummaryCard() {
   const [stats, setStats] = useState<KbStats>({
     manifests: 0,
     skill_records: 0,
+    families: 13,
+    fidelity_rungs: 4,
   });
 
   useEffect(() => {
@@ -44,7 +48,7 @@ export function KbSummaryCard() {
         </div>
       </div>
       <div className="mt-4 text-xs" style={{ color: "var(--text-secondary)" }}>
-        11 process families &middot; 4 fidelity rungs (R0–R3)
+        {stats.families} process families &middot; {stats.fidelity_rungs} fidelity rungs (R0–R3)
       </div>
     </div>
   );

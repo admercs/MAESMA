@@ -35,4 +35,4 @@ pub mod sensitivity;
 pub mod trophic;
 
 pub use registry::AgentRegistry;
-pub use traits::{Agent, AgentContext, AgentResult};
+pub use traits::{Agent, AgentContext, AgentId, AgentResult, AgentRole};
