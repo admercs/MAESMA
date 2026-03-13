@@ -62,7 +62,7 @@ impl HeartbeatDaemon {
         let mut outcomes = Vec::with_capacity(automatons.len());
 
         for automaton in automatons.iter_mut() {
-            let previous_tier = automaton.survival_tier.clone();
+            let previous_tier = automaton.survival_tier;
 
             // 1. Check conservation (constitutional law #1)
             let conservation_ok = automaton.check_conservation(0.0, 1e-6).is_ok();
@@ -95,7 +95,7 @@ impl HeartbeatDaemon {
                 );
             }
 
-            let current_tier = automaton.survival_tier.clone();
+            let current_tier = automaton.survival_tier;
             let tier_changed = previous_tier != current_tier;
 
             if tier_changed {
@@ -120,7 +120,7 @@ impl HeartbeatDaemon {
             });
         }
 
-        if self.cycles % 10 == 0 {
+        if self.cycles.is_multiple_of(10) {
             info!(
                 cycles = self.cycles,
                 transitions = self.total_transitions,
@@ -135,7 +135,7 @@ impl HeartbeatDaemon {
 
     /// Check if a specific heartbeat cycle needs full revalidation.
     pub fn needs_revalidation(&self) -> bool {
-        self.cycles % self.config.revalidation_cadence == 0
+        self.cycles.is_multiple_of(self.config.revalidation_cadence)
     }
 
     pub fn cycles(&self) -> u64 {

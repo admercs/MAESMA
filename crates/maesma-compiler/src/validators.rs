@@ -252,9 +252,10 @@ pub fn check_coupling_consistency(sapg: &Sapg, manifests: &ManifestIndex) -> Vec
                         });
                     }
 
-                    if let (Some(sv), Some(tv)) = (src_var, tgt_var) {
-                        if sv.unit != tv.unit {
-                            diags.push(Diagnostic {
+                    if let (Some(sv), Some(tv)) = (src_var, tgt_var)
+                        && sv.unit != tv.unit
+                    {
+                        diags.push(Diagnostic {
                                 level: DiagnosticLevel::Error,
                                 message: format!(
                                     "Unit mismatch for '{}': source '{}' produces '{}', target '{}' expects '{}'",
@@ -262,7 +263,6 @@ pub fn check_coupling_consistency(sapg: &Sapg, manifests: &ManifestIndex) -> Vec
                                 ),
                                 source: Some("coupling_consistency".into()),
                             });
-                        }
                     }
                 }
             }

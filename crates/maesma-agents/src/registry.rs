@@ -29,10 +29,7 @@ impl AgentRegistry {
 
     /// Get all agents with a given role.
     pub fn by_role(&self, role: AgentRole) -> Vec<&Arc<dyn Agent>> {
-        self.agents
-            .values()
-            .filter(|a| a.role() == role)
-            .collect()
+        self.agents.values().filter(|a| a.role() == role).collect()
     }
 
     /// List all registered agent IDs.

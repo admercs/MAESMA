@@ -122,6 +122,12 @@ pub struct FoundationModelAgent {
     job_statuses: Vec<InferenceJobStatus>,
 }
 
+impl Default for FoundationModelAgent {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FoundationModelAgent {
     pub fn new() -> Self {
         Self {

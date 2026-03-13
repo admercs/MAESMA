@@ -1,6 +1,5 @@
 //! Application state shared across all route handlers.
 
-
 /// Shared application state.
 #[derive(Clone)]
 pub struct AppState {

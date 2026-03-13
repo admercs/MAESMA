@@ -69,8 +69,8 @@ pub struct CenturySoilCarbon {
 impl Default for CenturySoilCarbon {
     fn default() -> Self {
         Self {
-            tau: [1.5, 25.0, 1000.0],          // years
-            efficiency: [0.40, 0.30, 0.10],     // fraction transferred (not respired)
+            tau: [1.5, 25.0, 1000.0],       // years
+            efficiency: [0.40, 0.30, 0.10], // fraction transferred (not respired)
             cn_ratio: [15.0, 20.0, 10.0],
             f_active_to_passive: 0.004,
             f_slow_to_passive: 0.03,
@@ -162,15 +162,11 @@ impl ProcessRunner for CenturySoilCarbon {
         // Get mutable access to pool fields
         let c_act = state
             .get_field("soil_carbon_active")
-            .ok_or_else(|| {
-                maesma_core::Error::Runtime("missing field: soil_carbon_active".into())
-            })?
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: soil_carbon_active".into()))?
             .clone();
         let c_slow = state
             .get_field("soil_carbon_slow")
-            .ok_or_else(|| {
-                maesma_core::Error::Runtime("missing field: soil_carbon_slow".into())
-            })?
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: soil_carbon_slow".into()))?
             .clone();
         let c_pass = state
             .get_field("soil_carbon_passive")
@@ -208,7 +204,7 @@ impl ProcessRunner for CenturySoilCarbon {
             // ── Litter partitioning ──
             // Metabolic fraction = 1 − lignin_fraction (simplified from Parton)
             let lit_c = lit_sl[i].max(0.0) * dt; // total litter C [kg C m⁻²] this step
-            let lit_struct = lit_c * lig_frac;    // structural → slow pool
+            let lit_struct = lit_c * lig_frac; // structural → slow pool
             let lit_metab = lit_c * (1.0 - lig_frac); // metabolic → active pool
 
             // ── Pool decomposition ──

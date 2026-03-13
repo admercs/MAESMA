@@ -143,7 +143,7 @@ impl TwoStreamRadiation {
         let trans_diff = m / denom; // transmission coefficient (approx)
         let trans_diff = trans_diff.clamp(0.0, 1.0);
 
-        let refl_diff = (h - m) / h;  // diffuse reflectance by canopy
+        let refl_diff = (h - m) / h; // diffuse reflectance by canopy
         let refl_diff = refl_diff.clamp(0.0, 1.0 - 1e-10);
 
         // Absorbed fraction of diffuse
@@ -153,8 +153,7 @@ impl TwoStreamRadiation {
         let abs_diff = sw_diff * abs_diff_frac * (1.0 - omega);
 
         // Reflected diffuse
-        let refl_from_diff = sw_diff * refl_diff
-            + sw_diff * trans_diff * albedo_soil * trans_diff;
+        let refl_from_diff = sw_diff * refl_diff + sw_diff * trans_diff * albedo_soil * trans_diff;
 
         // Transmitted diffuse to soil
         let trans_to_soil_diff = sw_diff * trans_diff;
@@ -256,15 +255,11 @@ impl ProcessRunner for TwoStreamRadiation {
             .clone();
         let alb_par = state
             .get_field("albedo_soil_par")
-            .ok_or_else(|| {
-                maesma_core::Error::Runtime("missing field: albedo_soil_par".into())
-            })?
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: albedo_soil_par".into()))?
             .clone();
         let alb_nir = state
             .get_field("albedo_soil_nir")
-            .ok_or_else(|| {
-                maesma_core::Error::Runtime("missing field: albedo_soil_nir".into())
-            })?
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: albedo_soil_nir".into()))?
             .clone();
 
         let n = cos_z.len();
@@ -351,7 +346,10 @@ mod tests {
 
     #[test]
     fn test_g_function_spherical() {
-        let m = TwoStreamRadiation { chi_l: 0.0, ..Default::default() };
+        let m = TwoStreamRadiation {
+            chi_l: 0.0,
+            ..Default::default()
+        };
         // Spherical leaves: G ≈ 0.5 for any angle
         let g = m.g_mu(0.5);
         assert!((g - 0.5).abs() < 0.05, "G(0.5) = {g}, expected ~0.5");
@@ -361,8 +359,11 @@ mod tests {
     fn test_kb_increases_with_low_sun() {
         let m = TwoStreamRadiation::default();
         let kb_high = m.kb(0.9); // high sun
-        let kb_low = m.kb(0.2);  // low sun
-        assert!(kb_low > kb_high, "Extinction should increase at low sun angles");
+        let kb_low = m.kb(0.2); // low sun
+        assert!(
+            kb_low > kb_high,
+            "Extinction should increase at low sun angles"
+        );
     }
 
     #[test]
@@ -370,7 +371,10 @@ mod tests {
         let m = TwoStreamRadiation::default();
         let (abs, _refl, trans) = m.two_stream_band(0.7, 0.0, 0.17, 0.1, 200.0, 50.0);
         assert_eq!(abs, 0.0, "No canopy → no canopy absorption");
-        assert!((trans - 250.0).abs() < 1.0, "All radiation should reach soil");
+        assert!(
+            (trans - 250.0).abs() < 1.0,
+            "All radiation should reach soil"
+        );
     }
 
     #[test]
@@ -387,7 +391,10 @@ mod tests {
         );
         assert!(abs > 0.0, "Dense canopy should absorb radiation");
         assert!(refl > 0.0, "Some radiation should be reflected");
-        assert!(trans < total_in, "Not all radiation should pass through LAI=3 canopy");
+        assert!(
+            trans < total_in,
+            "Not all radiation should pass through LAI=3 canopy"
+        );
     }
 
     #[test]
@@ -395,7 +402,10 @@ mod tests {
         let m = TwoStreamRadiation::default();
         let (abs_low, _, _) = m.two_stream_band(0.7, 1.0, 0.17, 0.1, 300.0, 100.0);
         let (abs_high, _, _) = m.two_stream_band(0.7, 6.0, 0.17, 0.1, 300.0, 100.0);
-        assert!(abs_high > abs_low, "Higher LAI should absorb more: {abs_high} vs {abs_low}");
+        assert!(
+            abs_high > abs_low,
+            "Higher LAI should absorb more: {abs_high} vs {abs_low}"
+        );
     }
 
     #[test]

@@ -8,8 +8,8 @@ pub mod routes;
 pub mod state;
 
 use axum::{
-    routing::{get, post},
     Router,
+    routing::{get, post},
 };
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;

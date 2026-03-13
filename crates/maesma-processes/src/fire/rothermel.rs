@@ -19,6 +19,21 @@ pub struct RothermelSurface {
     pub moisture_of_extinction: f64, // fraction
 }
 
+impl Default for RothermelSurface {
+    fn default() -> Self {
+        Self {
+            fuel_bed_depth: 0.3,
+            fuel_load: 0.7,
+            surface_area_to_volume: 5600.0,
+            fuel_moisture_content: 0.08,
+            mineral_content: 0.01,
+            fuel_particle_density: 512.0,
+            heat_content: 18600.0,
+            moisture_of_extinction: 0.30,
+        }
+    }
+}
+
 impl RothermelSurface {
     /// Calculate the forward rate of spread (m/s).
     pub fn rate_of_spread(&self, wind_speed: f64, slope: f64) -> f64 {

@@ -112,15 +112,11 @@ impl ProcessRunner for LotkaVolterraTrophic {
             .clone();
         let pred = state
             .get_field("predator_biomass")
-            .ok_or_else(|| {
-                maesma_core::Error::Runtime("missing field: predator_biomass".into())
-            })?
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: predator_biomass".into()))?
             .clone();
         let cap = state
             .get_field("carrying_capacity")
-            .ok_or_else(|| {
-                maesma_core::Error::Runtime("missing field: carrying_capacity".into())
-            })?
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: carrying_capacity".into()))?
             .clone();
 
         let n_len = prey.len();
@@ -193,14 +189,8 @@ mod tests {
         let p_star = (m.alpha / m.beta) * (1.0 - n_star / k);
 
         let (dn, dp) = m.derivatives(n_star, p_star, k);
-        assert!(
-            dn.abs() < 1e-20,
-            "dN/dt should be ~0 at equilibrium: {dn}"
-        );
-        assert!(
-            dp.abs() < 1e-20,
-            "dP/dt should be ~0 at equilibrium: {dp}"
-        );
+        assert!(dn.abs() < 1e-20, "dN/dt should be ~0 at equilibrium: {dn}");
+        assert!(dp.abs() < 1e-20, "dP/dt should be ~0 at equilibrium: {dp}");
     }
 
     #[test]
@@ -222,10 +212,7 @@ mod tests {
         let m = LotkaVolterraTrophic::default();
         // When N = K, prey at capacity
         let (dn, _dp) = m.derivatives(100.0, 0.0, 100.0);
-        assert!(
-            dn.abs() < 1e-20,
-            "At K, prey should stop growing: {dn}"
-        );
+        assert!(dn.abs() < 1e-20, "At K, prey should stop growing: {dn}");
     }
 
     #[test]

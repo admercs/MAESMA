@@ -129,10 +129,10 @@ async fn main() -> anyhow::Result<()> {
                 let kb = maesma_knowledgebase::KnowledgebaseStore::open(&cli.db)?;
                 let manifests = kb.list_manifests()?;
                 for (id, name, fam) in &manifests {
-                    if let Some(ref f) = family {
-                        if !fam.contains(f) {
-                            continue;
-                        }
+                    if let Some(ref f) = family
+                        && !fam.contains(f)
+                    {
+                        continue;
                     }
                     println!("{id}  {fam:<20}  {name}");
                 }
@@ -205,20 +205,13 @@ async fn main() -> anyhow::Result<()> {
         }
 
         Commands::Run { config: _, steps } => {
-            // Initialize KB and create a minimal simulation.
             let _kb = maesma_knowledgebase::KnowledgebaseStore::open(&cli.db)?;
+            println!("Building default pipeline (10×10 grid)...");
+
+            let (mut scheduler, mut sim_state, mut event_bus) =
+                maesma_runtime::build_default_pipeline(10, 10)?;
+
             println!("Starting simulation for {steps} steps...");
-
-            // Create a minimal state and schedule.
-            let state = maesma_runtime::SimulationState::new(10, 10);
-            let schedule = maesma_compiler::schedule::ExecutionSchedule {
-                stages: vec![],
-                dt_global: 86400.0,
-            };
-            let mut scheduler = maesma_runtime::Scheduler::new(schedule);
-            let mut event_bus = maesma_runtime::EventBus::new();
-            let mut sim_state = state;
-
             scheduler.run(&mut sim_state, &mut event_bus, steps)?;
             println!(
                 "✓ Simulation complete: {} steps, time = {:.0}s",

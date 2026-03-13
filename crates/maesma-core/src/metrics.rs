@@ -64,25 +64,22 @@ pub fn pareto_dominates(a: &SkillMetrics, b: &SkillMetrics) -> bool {
     let mut at_least_one_better = false;
 
     for (va, vb, lower_is_better) in pairs {
-        match (va, vb) {
-            (Some(x), Some(y)) => {
-                if lower_is_better {
-                    if x > y {
-                        return false;
-                    }
-                    if x < y {
-                        at_least_one_better = true;
-                    }
-                } else {
-                    if x < y {
-                        return false;
-                    }
-                    if x > y {
-                        at_least_one_better = true;
-                    }
+        if let (Some(x), Some(y)) = (va, vb) {
+            if lower_is_better {
+                if x > y {
+                    return false;
+                }
+                if x < y {
+                    at_least_one_better = true;
+                }
+            } else {
+                if x < y {
+                    return false;
+                }
+                if x > y {
+                    at_least_one_better = true;
                 }
             }
-            _ => {} // skip if either is None
         }
     }
 

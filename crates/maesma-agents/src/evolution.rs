@@ -107,6 +107,12 @@ pub struct EvolutionAgent {
     generation: u64,
 }
 
+impl Default for EvolutionAgent {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EvolutionAgent {
     pub fn new() -> Self {
         Self {
@@ -223,7 +229,7 @@ impl Agent for EvolutionAgent {
     async fn execute(&self, _ctx: AgentContext) -> maesma_core::Result<AgentResult> {
         // In the full runtime, this agent is invoked by the scheduler at each
         // evolution cadence. For now, report configuration and readiness.
-        Ok(AgentResult::ok(&format!(
+        Ok(AgentResult::ok(format!(
             "EvolutionAgent ready — gen {}, pop_size {}, mutation_rate {:.2}, \
              tiers: normal>{:.1}, low>{:.1}, stagnation_limit {}",
             self.generation,

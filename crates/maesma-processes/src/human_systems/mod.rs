@@ -38,6 +38,7 @@ use maesma_core::process::{FidelityRung, ProcessRunner, ProcessState};
 // Default 4-class system indices
 const FOREST: usize = 0;
 const CROPLAND: usize = 1;
+#[allow(dead_code)]
 const GRASSLAND: usize = 2;
 const URBAN: usize = 3;
 const N_CLASSES: usize = 4;
@@ -161,9 +162,7 @@ impl ProcessRunner for LandUseChange {
     fn step(&mut self, state: &mut dyn ProcessState, _dt: f64) -> maesma_core::Result<()> {
         let pop = state
             .get_field("population_density")
-            .ok_or_else(|| {
-                maesma_core::Error::Runtime("missing field: population_density".into())
-            })?
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: population_density".into()))?
             .clone();
         let econ = state
             .get_field("economic_driver")
@@ -175,9 +174,7 @@ impl ProcessRunner for LandUseChange {
             .clone();
         let frac_field = state
             .get_field("land_use_fractions")
-            .ok_or_else(|| {
-                maesma_core::Error::Runtime("missing field: land_use_fractions".into())
-            })?
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: land_use_fractions".into()))?
             .clone();
 
         // For the simple case: each grid cell has N_CLASSES fractions stored
@@ -190,7 +187,10 @@ impl ProcessRunner for LandUseChange {
 
         // Number of cells
         let n_cells = if n > 0 { frac_data.len() / n } else { 0 };
-        let n_cells = n_cells.min(pop_data.len()).min(econ_data.len()).min(pol_data.len());
+        let n_cells = n_cells
+            .min(pop_data.len())
+            .min(econ_data.len())
+            .min(pol_data.len());
 
         let mut new_fracs = vec![0.0f64; n_cells * n];
         let mut harvest = vec![0.0f64; n_cells];
@@ -201,17 +201,12 @@ impl ProcessRunner for LandUseChange {
             let end = start + n;
             let cell_frac = &frac_data[start..end];
 
-            let new_f =
-                self.apply_transition(cell_frac, pop_data[c], econ_data[c], pol_data[c]);
+            let new_f = self.apply_transition(cell_frac, pop_data[c], econ_data[c], pol_data[c]);
 
             new_fracs[start..end].copy_from_slice(&new_f);
 
             // Diagnosed harvest and fertiliser
-            let crop_frac = if n > CROPLAND {
-                new_f[CROPLAND]
-            } else {
-                0.0
-            };
+            let crop_frac = if n > CROPLAND { new_f[CROPLAND] } else { 0.0 };
             harvest[c] = self.base_harvest * crop_frac * (1.0 + econ_data[c]);
             fert[c] = self.base_fertilizer * crop_frac * (1.0 + econ_data[c] * 0.5);
         }
@@ -256,10 +251,7 @@ mod tests {
         let f = vec![0.5, 0.2, 0.2, 0.1];
         let new_f = m.apply_transition(&f, 100.0, 0.5, 0.0);
         let sum: f64 = new_f.iter().sum();
-        assert!(
-            (sum - 1.0).abs() < 1e-10,
-            "Fractions must sum to 1: {sum}"
-        );
+        assert!((sum - 1.0).abs() < 1e-10, "Fractions must sum to 1: {sum}");
     }
 
     #[test]

@@ -96,11 +96,10 @@ impl FederationClient {
         peer_id: &str,
         request: FederationRequest,
     ) -> maesma_core::Result<FederationResponse> {
-        let peer = self
-            .peers
-            .iter()
-            .find(|p| p.id == peer_id)
-            .ok_or_else(|| maesma_core::Error::Federation(format!("Unknown peer: {}", peer_id)))?;
+        let peer =
+            self.peers.iter().find(|p| p.id == peer_id).ok_or_else(|| {
+                maesma_core::Error::Federation(format!("Unknown peer: {}", peer_id))
+            })?;
 
         let url = format!("{}/api/v1/federation", peer.url);
 

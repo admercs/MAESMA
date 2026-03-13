@@ -982,6 +982,7 @@ name = "maesma-agents"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "chrono",
  "maesma-core",
  "maesma-knowledgebase",
  "serde",
@@ -1115,8 +1116,12 @@ name = "maesma-runtime"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "maesma-agents",
  "maesma-compiler",
  "maesma-core",
+ "maesma-inference",
+ "maesma-knowledgebase",
+ "maesma-processes",
  "ndarray",
  "serde",
  "serde_json",

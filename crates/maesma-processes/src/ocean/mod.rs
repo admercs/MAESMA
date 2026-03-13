@@ -27,10 +27,10 @@ use maesma_core::families::ProcessFamily;
 use maesma_core::process::{FidelityRung, ProcessRunner, ProcessState};
 
 // ── Physical constants ──
-const RHO_SW: f64 = 1025.0;   // seawater density [kg m⁻³]
-const CP_SW: f64 = 3985.0;    // seawater specific heat [J kg⁻¹ K⁻¹]
-const ALPHA_T: f64 = 2.0e-4;  // thermal expansion coefficient [K⁻¹]
-const GRAV: f64 = 9.81;       // gravity [m s⁻²]
+const RHO_SW: f64 = 1025.0; // seawater density [kg m⁻³]
+const CP_SW: f64 = 3985.0; // seawater specific heat [J kg⁻¹ K⁻¹]
+const ALPHA_T: f64 = 2.0e-4; // thermal expansion coefficient [K⁻¹]
+const GRAV: f64 = 9.81; // gravity [m s⁻²]
 
 /// Mixed-layer ocean model (R1, Kraus-Turner slab).
 ///
@@ -66,7 +66,7 @@ impl Default for MixedLayerOcean {
         Self {
             mld_min: 10.0,
             mld_max: 500.0,
-            t_deep: 4.0,      // deep ocean ~4°C
+            t_deep: 4.0,                // deep ocean ~4°C
             tau_deep: 365.25 * 86400.0, // 1-year relaxation
             entrainment_eff: 0.5,
         }
@@ -150,9 +150,7 @@ impl ProcessRunner for MixedLayerOcean {
             .clone();
         let mld_field = state
             .get_field("mixed_layer_depth")
-            .ok_or_else(|| {
-                maesma_core::Error::Runtime("missing field: mixed_layer_depth".into())
-            })?
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: mixed_layer_depth".into()))?
             .clone();
 
         let n = sw.len();

@@ -119,6 +119,12 @@ pub struct AutonomousObservationAgent {
     active_taskings: Vec<TaskingRequest>,
 }
 
+impl Default for AutonomousObservationAgent {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AutonomousObservationAgent {
     pub fn new() -> Self {
         Self {

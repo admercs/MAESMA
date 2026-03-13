@@ -70,8 +70,7 @@ impl CfsFbpCrown {
             _ => (110.0, 0.0282, 1.5), // default to C2
         };
 
-        let ros = a * (1.0 - (-b * isi).exp()).powf(c0);
-        ros // m/min
+        a * (1.0 - (-b * isi).exp()).powf(c0) // m/min
     }
 
     /// Determine if crown fire initiation occurs.
@@ -243,6 +242,6 @@ mod tests {
     fn test_cfb_bounded() {
         let m = default_model();
         let cfb = m.crown_fraction_burned();
-        assert!(cfb >= 0.0 && cfb <= 1.0, "CFB should be in [0,1]: {cfb}");
+        assert!((0.0..=1.0).contains(&cfb), "CFB should be in [0,1]: {cfb}");
     }
 }

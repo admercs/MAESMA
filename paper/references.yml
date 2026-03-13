@@ -1,0 +1,194 @@
+# MAESMA Bibliography
+# This file uses Typst's built-in bibliography format (Hayagriva YAML).
+
+# ============================================================================
+# Earth System Models
+# ============================================================================
+
+hurrell-2013:
+  type: article
+  title: "The Community Earth System Model: A Framework for Collaborative Research"
+  author: ["Hurrell, James W.", "Holland, M. M.", "Gent, P. R.", "Ghan, S.", "Kay, J. E.", "Kushner, P. J.", "Lamarque, J.-F.", "Large, W. G.", "Lawrence, D.", "Lindsay, K.", "Lipscomb, W. H.", "Long, M. C.", "Mahowald, N.", "Marsh, D. R.", "Neale, R. B.", "Rasch, P.", "Vavrus, S.", "Vertenstein, M.", "Bader, D.", "Collins, W. D.", "Hack, J. J.", "Kiehl, J.", "Marshall, S."]
+  date: 2013
+  parent:
+    type: periodical
+    title: "Bulletin of the American Meteorological Society"
+  volume: 94
+  issue: 9
+  page-range: 1339-1360
+  doi: "10.1175/BAMS-D-12-00121.1"
+
+golaz-2019:
+  type: article
+  title: "The DOE E3SM Coupled Model Version 1: Overview and Evaluation at Standard Resolution"
+  author: ["Golaz, Jean-Christophe", "Caldwell, Peter M.", "Van Roekel, Luke P.", "Petersen, Mark R.", "Tang, Qi", "Wolfe, Jonathan D.", "Aber, Geneviève", "Anantharaj, Valentine", "Asay-Davis, Xylar S.", "Bader, David C."]
+  date: 2019
+  parent:
+    type: periodical
+    title: "Journal of Advances in Modeling Earth Systems"
+  volume: 11
+  issue: 7
+  page-range: 2089-2129
+  doi: "10.1029/2018MS001603"
+
+dunne-2020:
+  type: article
+  title: "The GFDL Earth System Model Version 4.1 (GFDL-ESM 4.1): Overall Coupled Model Description and Simulation Characteristics"
+  author: ["Dunne, John P.", "Horowitz, Larry W.", "Adcroft, Alistair J.", "Ginoux, Paul", "Held, Isaac M.", "John, Jasmin G.", "Krasting, John P.", "Malyshev, Sergey", "Naik, Vaishali", "Paulot, Fabien"]
+  date: 2020
+  parent:
+    type: periodical
+    title: "Journal of Advances in Modeling Earth Systems"
+  volume: 12
+  issue: 11
+  doi: "10.1029/2019MS002015"
+
+# ============================================================================
+# Neural Operators and Surrogates
+# ============================================================================
+
+li-2021-fno:
+  type: article
+  title: "Fourier Neural Operator for Parametric Partial Differential Equations"
+  author: ["Li, Zongyi", "Kovachki, Nikola", "Azizzadenesheli, Kamyar", "Liu, Burigede", "Bhatt, Kaushik", "Stuart, Andrew", "Anandkumar, Anima"]
+  date: 2021
+  parent:
+    type: periodical
+    title: "International Conference on Learning Representations (ICLR)"
+
+li-2023-pino:
+  type: article
+  title: "Physics-Informed Neural Operator for Learning Partial Differential Equations"
+  author: ["Li, Zongyi", "Zheng, Hongkai", "Kovachki, Nikola", "Jin, David", "Chen, Haoxuan", "Liu, Burigede", "Azizzadenesheli, Kamyar", "Anandkumar, Anima"]
+  date: 2023
+  parent:
+    type: periodical
+    title: "ACM/JMS Journal of Data Science"
+  volume: 1
+  issue: 3
+  doi: "10.1145/3648506"
+
+lu-2021:
+  type: article
+  title: "Learning Nonlinear Operators via DeepONet Based on the Universal Approximation Theorem of Operators"
+  author: ["Lu, Lu", "Jin, Pengzhan", "Pang, Guofei", "Zhang, Zhongqiang", "Karniadakis, George Em"]
+  date: 2021
+  parent:
+    type: periodical
+    title: "Nature Machine Intelligence"
+  volume: 3
+  page-range: 218-229
+  doi: "10.1038/s42256-021-00302-5"
+
+pfaff-2021:
+  type: article
+  title: "Learning Mesh-Based Simulation with Graph Networks"
+  author: ["Pfaff, Tobias", "Fortunato, Meire", "Sanchez-Gonzalez, Alvaro", "Battaglia, Peter W."]
+  date: 2021
+  parent:
+    type: periodical
+    title: "International Conference on Learning Representations (ICLR)"
+
+# ============================================================================
+# Multi-Agent and Agentic AI
+# ============================================================================
+
+ghafarollahi-2024:
+  type: article
+  title: "SciAgents: Automating Scientific Discovery through Multi-Agent Intelligent Graph Reasoning"
+  author: ["Ghafarollahi, Alireza", "Buehler, Markus J."]
+  date: 2024
+  parent:
+    type: periodical
+    title: "arXiv preprint"
+  serial-number: "arXiv:2409.05556"
+
+bran-2024:
+  type: article
+  title: "ChemCrow: Augmenting Large-Language Models with Chemistry Tools"
+  author: ["Bran, Andres M.", "Cox, Sam", "Schilter, Oliver", "Baldassari, Carlo", "White, Andrew D.", "Schwaller, Philippe"]
+  date: 2024
+  parent:
+    type: periodical
+    title: "Nature Machine Intelligence"
+  volume: 6
+  page-range: 525-535
+  doi: "10.1038/s42256-024-00832-8"
+
+# ============================================================================
+# AutoML and Neural Architecture Search
+# ============================================================================
+
+hutter-2019:
+  type: book
+  title: "Automated Machine Learning: Methods, Systems, Challenges"
+  author: ["Hutter, Frank", "Kotthoff, Lars", "Vanschoren, Joaquin"]
+  date: 2019
+  publisher: "Springer"
+  doi: "10.1007/978-3-030-05318-5"
+
+zoph-2017:
+  type: article
+  title: "Neural Architecture Search with Reinforcement Learning"
+  author: ["Zoph, Barret", "Le, Quoc V."]
+  date: 2017
+  parent:
+    type: periodical
+    title: "International Conference on Learning Representations (ICLR)"
+
+lu-2019-nas:
+  type: article
+  title: "NSGA-Net: Neural Architecture Search using Multi-Objective Genetic Algorithm"
+  author: ["Lu, Zhichao", "Whalen, Ian", "Boddeti, Vishnu", "Dhebar, Yashesh", "Deb, Kalyanmoy", "Goodman, Erik", "Banzhaf, Wolfgang"]
+  date: 2019
+  parent:
+    type: periodical
+    title: "Genetic and Evolutionary Computation Conference (GECCO)"
+  page-range: 419-427
+  doi: "10.1145/3321707.3321729"
+
+# ============================================================================
+# Artificial Life and Evolutionary Computation
+# ============================================================================
+
+stanley-2019:
+  type: book
+  title: "Why Greatness Cannot Be Planned: The Myth of the Objective"
+  author: ["Stanley, Kenneth O.", "Lehman, Joel"]
+  date: 2019
+  publisher: "Springer"
+
+ray-1991:
+  type: article
+  title: "An Approach to the Synthesis of Life"
+  author: ["Ray, Thomas S."]
+  date: 1991
+  parent:
+    type: periodical
+    title: "Artificial Life II"
+  page-range: 371-408
+
+pugh-2016:
+  type: article
+  title: "Quality Diversity: A New Frontier for Evolutionary Computation"
+  author: ["Pugh, Justin K.", "Soros, Lisa B.", "Stanley, Kenneth O."]
+  date: 2016
+  parent:
+    type: periodical
+    title: "Frontiers in Robotics and AI"
+  volume: 3
+  doi: "10.3389/frobt.2016.00040"
+
+ofria-2004:
+  type: article
+  title: "Avida: A Software Platform for Research in Computational Evolutionary Biology"
+  author: ["Ofria, Charles", "Wilke, Claus O."]
+  date: 2004
+  parent:
+    type: periodical
+    title: "Artificial Life"
+  volume: 10
+  issue: 2
+  page-range: 191-229
+  doi: "10.1162/106454604773563612"
+

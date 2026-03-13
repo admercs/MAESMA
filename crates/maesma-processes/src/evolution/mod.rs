@@ -134,9 +134,7 @@ impl ProcessRunner for QuantitativeGeneticsEvolution {
             .clone();
         let sel_field = state
             .get_field("selection_gradient")
-            .ok_or_else(|| {
-                maesma_core::Error::Runtime("missing field: selection_gradient".into())
-            })?
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: selection_gradient".into()))?
             .clone();
 
         let n = mean_field.len();

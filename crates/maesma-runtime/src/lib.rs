@@ -7,11 +7,13 @@
 pub mod events;
 pub mod health;
 pub mod heartbeat;
+pub mod pipeline;
 pub mod scheduler;
 pub mod state;
 
 pub use events::{Event, EventBus};
 pub use health::HealthMonitor;
 pub use heartbeat::{HeartbeatDaemon, HeartbeatOutcome};
+pub use pipeline::build_default_pipeline;
 pub use scheduler::Scheduler;
 pub use state::{ProcessStateAdapter, SimulationState};

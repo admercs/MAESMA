@@ -54,9 +54,7 @@ impl Regime {
     /// Check whether this regime matches a set of required tags.
     pub fn matches_all(&self, required: &[RegimeTag]) -> bool {
         let all = self.all_tags();
-        required
-            .iter()
-            .all(|req| all.iter().any(|t| t.0 == req.0))
+        required.iter().all(|req| all.iter().any(|t| t.0 == req.0))
     }
 }
 
@@ -66,28 +64,68 @@ pub mod tags {
     use super::RegimeTag;
 
     // Biomes
-    pub fn boreal_forest() -> RegimeTag { RegimeTag::new("boreal_forest") }
-    pub fn temperate_forest() -> RegimeTag { RegimeTag::new("temperate_forest") }
-    pub fn tropical_forest() -> RegimeTag { RegimeTag::new("tropical_forest") }
-    pub fn savanna() -> RegimeTag { RegimeTag::new("savanna") }
-    pub fn grassland() -> RegimeTag { RegimeTag::new("grassland") }
-    pub fn tundra() -> RegimeTag { RegimeTag::new("tundra") }
-    pub fn desert() -> RegimeTag { RegimeTag::new("desert") }
-    pub fn wetland() -> RegimeTag { RegimeTag::new("wetland") }
-    pub fn cropland() -> RegimeTag { RegimeTag::new("cropland") }
-    pub fn urban() -> RegimeTag { RegimeTag::new("urban") }
+    pub fn boreal_forest() -> RegimeTag {
+        RegimeTag::new("boreal_forest")
+    }
+    pub fn temperate_forest() -> RegimeTag {
+        RegimeTag::new("temperate_forest")
+    }
+    pub fn tropical_forest() -> RegimeTag {
+        RegimeTag::new("tropical_forest")
+    }
+    pub fn savanna() -> RegimeTag {
+        RegimeTag::new("savanna")
+    }
+    pub fn grassland() -> RegimeTag {
+        RegimeTag::new("grassland")
+    }
+    pub fn tundra() -> RegimeTag {
+        RegimeTag::new("tundra")
+    }
+    pub fn desert() -> RegimeTag {
+        RegimeTag::new("desert")
+    }
+    pub fn wetland() -> RegimeTag {
+        RegimeTag::new("wetland")
+    }
+    pub fn cropland() -> RegimeTag {
+        RegimeTag::new("cropland")
+    }
+    pub fn urban() -> RegimeTag {
+        RegimeTag::new("urban")
+    }
 
     // Disturbances
-    pub fn fire_prone() -> RegimeTag { RegimeTag::new("fire_prone") }
-    pub fn flood_prone() -> RegimeTag { RegimeTag::new("flood_prone") }
-    pub fn drought_prone() -> RegimeTag { RegimeTag::new("drought_prone") }
-    pub fn insect_outbreak() -> RegimeTag { RegimeTag::new("insect_outbreak") }
-    pub fn permafrost_thaw() -> RegimeTag { RegimeTag::new("permafrost_thaw") }
+    pub fn fire_prone() -> RegimeTag {
+        RegimeTag::new("fire_prone")
+    }
+    pub fn flood_prone() -> RegimeTag {
+        RegimeTag::new("flood_prone")
+    }
+    pub fn drought_prone() -> RegimeTag {
+        RegimeTag::new("drought_prone")
+    }
+    pub fn insect_outbreak() -> RegimeTag {
+        RegimeTag::new("insect_outbreak")
+    }
+    pub fn permafrost_thaw() -> RegimeTag {
+        RegimeTag::new("permafrost_thaw")
+    }
 
     // Seasons
-    pub fn dry_season() -> RegimeTag { RegimeTag::new("dry_season") }
-    pub fn wet_season() -> RegimeTag { RegimeTag::new("wet_season") }
-    pub fn fire_season() -> RegimeTag { RegimeTag::new("fire_season") }
-    pub fn growing_season() -> RegimeTag { RegimeTag::new("growing_season") }
-    pub fn dormant_season() -> RegimeTag { RegimeTag::new("dormant_season") }
+    pub fn dry_season() -> RegimeTag {
+        RegimeTag::new("dry_season")
+    }
+    pub fn wet_season() -> RegimeTag {
+        RegimeTag::new("wet_season")
+    }
+    pub fn fire_season() -> RegimeTag {
+        RegimeTag::new("fire_season")
+    }
+    pub fn growing_season() -> RegimeTag {
+        RegimeTag::new("growing_season")
+    }
+    pub fn dormant_season() -> RegimeTag {
+        RegimeTag::new("dormant_season")
+    }
 }

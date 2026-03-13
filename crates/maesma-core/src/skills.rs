@@ -69,9 +69,10 @@ impl SkillHistory {
     pub fn pareto_front(&self) -> Vec<&SkillRecord> {
         let mut front = Vec::new();
         for (i, a) in self.records.iter().enumerate() {
-            let dominated = self.records.iter().enumerate().any(|(j, b)| {
-                i != j && crate::metrics::pareto_dominates(&b.metrics, &a.metrics)
-            });
+            let dominated =
+                self.records.iter().enumerate().any(|(j, b)| {
+                    i != j && crate::metrics::pareto_dominates(&b.metrics, &a.metrics)
+                });
             if !dominated {
                 front.push(a);
             }

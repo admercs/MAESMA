@@ -125,11 +125,11 @@ impl ProcessRunner for StochasticFireRegime {
             burned[i] = (p_fire * self.mean_fire_size).min(1.0);
         }
 
-        if let Some(f) = state.get_field_mut("burned_area_fraction") {
-            if let Some(sl) = f.as_slice_mut() {
-                for (o, v) in sl.iter_mut().zip(burned.iter()) {
-                    *o = *v;
-                }
+        if let Some(f) = state.get_field_mut("burned_area_fraction")
+            && let Some(sl) = f.as_slice_mut()
+        {
+            for (o, v) in sl.iter_mut().zip(burned.iter()) {
+                *o = *v;
             }
         }
 

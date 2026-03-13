@@ -213,25 +213,25 @@ impl ProcessRunner for BucketModel {
         }
 
         // Write back output fields if they exist.
-        if let Some(runoff_field) = state.get_field_mut("runoff") {
-            if let Some(sl) = runoff_field.as_slice_mut() {
-                for (o, v) in sl.iter_mut().zip(runoff_vals.iter()) {
-                    *o = *v;
-                }
+        if let Some(runoff_field) = state.get_field_mut("runoff")
+            && let Some(sl) = runoff_field.as_slice_mut()
+        {
+            for (o, v) in sl.iter_mut().zip(runoff_vals.iter()) {
+                *o = *v;
             }
         }
-        if let Some(et_field) = state.get_field_mut("actual_et") {
-            if let Some(sl) = et_field.as_slice_mut() {
-                for (o, v) in sl.iter_mut().zip(et_vals.iter()) {
-                    *o = *v;
-                }
+        if let Some(et_field) = state.get_field_mut("actual_et")
+            && let Some(sl) = et_field.as_slice_mut()
+        {
+            for (o, v) in sl.iter_mut().zip(et_vals.iter()) {
+                *o = *v;
             }
         }
-        if let Some(drain_field) = state.get_field_mut("drainage") {
-            if let Some(sl) = drain_field.as_slice_mut() {
-                for (o, v) in sl.iter_mut().zip(drain_vals.iter()) {
-                    *o = *v;
-                }
+        if let Some(drain_field) = state.get_field_mut("drainage")
+            && let Some(sl) = drain_field.as_slice_mut()
+        {
+            for (o, v) in sl.iter_mut().zip(drain_vals.iter()) {
+                *o = *v;
             }
         }
 
@@ -249,6 +249,15 @@ pub struct RichardsInfiltration {
     pub k_sat: f64,
     /// Soil porosity [-]
     pub porosity: f64,
+}
+
+impl Default for RichardsInfiltration {
+    fn default() -> Self {
+        Self {
+            k_sat: 1e-5,
+            porosity: 0.45,
+        }
+    }
 }
 
 impl ProcessRunner for RichardsInfiltration {

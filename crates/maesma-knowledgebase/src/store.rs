@@ -4,7 +4,7 @@ use maesma_core::manifest::ProcessManifest;
 use maesma_core::ontology::Relation;
 use maesma_core::process::ProcessId;
 use maesma_core::skills::SkillRecord;
-use rusqlite::{params, Connection};
+use rusqlite::{Connection, params};
 use tracing::info;
 
 /// The central knowledgebase store.
@@ -175,10 +175,8 @@ impl KnowledgebaseStore {
             .map_err(|e| maesma_core::Error::Knowledgebase(e.to_string()))?;
 
         let mut results = Vec::new();
-        for row in rows {
-            if let Ok(r) = row {
-                results.push(r);
-            }
+        for r in rows.flatten() {
+            results.push(r);
         }
         Ok(results)
     }

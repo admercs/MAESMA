@@ -8,9 +8,17 @@ license.workspace = true
 [dependencies]
 maesma-core = { path = "../maesma-core" }
 maesma-compiler = { path = "../maesma-compiler" }
+maesma-processes = { path = "../maesma-processes" }
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 ndarray.workspace = true
 chrono.workspace = true
+
+[dev-dependencies]
+maesma-agents = { path = "../maesma-agents" }
+maesma-knowledgebase = { path = "../maesma-knowledgebase" }
+maesma-inference = { path = "../maesma-inference" }
+serde_json.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

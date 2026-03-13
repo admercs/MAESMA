@@ -28,7 +28,10 @@ impl HealthMonitor {
         if state.has_nan() {
             self.nan_events += 1;
             self.healthy_steps = 0;
-            error!(nan_events = self.nan_events, "NaN detected in simulation state");
+            error!(
+                nan_events = self.nan_events,
+                "NaN detected in simulation state"
+            );
             return Err(maesma_core::Error::Runtime(
                 "NaN detected in simulation state — hot-swap or rollback required".into(),
             ));
