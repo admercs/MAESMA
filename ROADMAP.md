@@ -55,7 +55,7 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
   - EIA energy, GBIF/eBird, NEON surveys, FAO fisheries, TRY/BIEN traits
   - PBDB fossil record, TimeTree phylogenies, Quaternary pollen records
   - CNEOS Sentry NEO catalog, MPC orbital elements
-- [ ] Implement observation access adapters (point extraction, spatial averaging, temporal alignment)
+- [x] Implement observation access adapters (point extraction, spatial averaging, temporal alignment)
 
 ### 0.7 Skill Metric Library
 - [x] Implement: RMSE, MAE, bias, correlation (Pearson/Spearman), KGE + decomposition, CRPS, timing errors, conservation residuals
@@ -94,25 +94,25 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 - [x] Ignition → spawn F1/F2 fire solver in bounding box
 - [x] Extreme rain → upgrade H0→H1/H2 in affected basins
 - [x] Drought → upgrade R0→R1 locally
-- [ ] Management action → spawn disturbance operator
+- [x] Management action → spawn disturbance operator
 - [x] Hysteresis management: hold timers, graceful downshift
 - [ ] Embedded subdomain GPU allocation + boundary transfer
 
 ### 2.3 Error & Uncertainty Monitoring
 - [x] Per-process, per-region error monitors
-- [ ] Refinement triggers (event-driven, threshold-based, regime-based)
+- [x] Refinement triggers (event-driven, threshold-based, regime-based)
 - [ ] Information-loss accumulation tracking
-- [ ] Rung upgrade/downgrade decision engine
+- [x] Rung upgrade/downgrade decision engine
 
 ### 2.4 Skill Score Store
 - [x] Append-only, versioned schema: config hash, rungs, coupled context, region, regime, season, metric vector, observation IDs, provenance
 - [ ] Backend (embedded DB or indexed Parquet/Arrow)
-- [ ] Query API: filter by rung/region/regime/context; aggregate across dimensions
-- [ ] Versioning: track skill evolution as modules, parameters, or data improve
+- [x] Query API: filter by rung/region/regime/context; aggregate across dimensions
+- [x] Versioning: track skill evolution as modules, parameters, or data improve
 
 ### 2.5 Disturbance Operator Pipeline
-- [ ] Fire severity → canopy loss, dead fuel, hydrophobicity, C/N emissions + char
-- [ ] Disturbance footprint application to slow-tier ecology/BGC state
+- [x] Fire severity → canopy loss, dead fuel, hydrophobicity, C/N emissions + char
+- [x] Disturbance footprint application to slow-tier ecology/BGC state
 - [ ] Post-disturbance spin-up and stabilization
 
 ### 2.6 Neural Inference Engine
@@ -128,9 +128,9 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 ## Phase 3 — Process Modules
 
 ### 3.1 Radiation & Energy Balance
-- [ ] **R0**: Daily potential solar (slope/aspect + latitude) + empirical canopy attenuation
+- [x] **R0**: Daily potential solar (slope/aspect + latitude) + empirical canopy attenuation
 - [ ] **R1**: Sub-daily SW partitioning + LW + canopy energy balance (hourly)
-- [ ] Fuel moisture drying model (coupled to R0/R1)
+- [x] Fuel moisture drying model (coupled to R0/R1)
 
 ### 3.2 Hydrology
 - [x] **H0**: Bucket + curve-number runoff + simple baseflow (km, daily)
@@ -139,53 +139,53 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 - [ ] Post-fire runoff/erosion risk index
 
 ### 3.3 Ecology & Succession
-- [ ] **E0**: Cohort mosaic (species × age/biomass cohorts, 30–250 m, annual)
+- [x] **E0**: Cohort mosaic (species × age/biomass cohorts, 30–250 m, annual)
 - [ ] Fuel strata derivation from stand structure; crown fire threshold
 
 ### 3.4 Biogeochemistry
-- [ ] **B0**: Big-leaf carbon + simple soil pools
+- [x] **B0**: Big-leaf carbon + simple soil pools
 - [ ] **B1**: Multi-pool C/N + litter + microbial decomposition (daily)
 - [ ] Fire coupling: combustion emissions, char/black carbon, post-fire mineralization
 
 ### 3.5 Fire Behavior & Effects
 - [x] **F1**: Rothermel + CFS FBP cellular spread with wind/topo/fuels (10–100 m, 1–10 min); Rothermel for surface fire ROS, CFS FBP for crown fire initiation/spread
-- [ ] Disturbance output: burn perimeter, severity, fuel transitions, heat pulse, hydrophobicity, ash, canopy loss
+- [x] Disturbance output: burn perimeter, severity, fuel transitions, heat pulse, hydrophobicity, ash, canopy loss
 - [ ] **F2**: Wind-aware spread with plume feedback (5–50 m, sec–min); physics-based models (Balbi, level-set) — *(stretch)*
 
 ### 3.6 Atmosphere
-- [ ] **A0**: Prescribed reanalysis (ERA5-Land, AORC, NLDAS-2); interpolation to model grid
+- [x] **A0**: Prescribed reanalysis (ERA5-Land, AORC, NLDAS-2); interpolation to model grid
 - [ ] **A1**: Regional downscaling (WRF-like, 5–25 km, min); bdy conditions from reanalysis/GCM
 - [ ] **A2**: Non-hydrostatic convection-permitting (1–4 km, sec); cloud microphysics + aerosol — *(stretch)*
 - [ ] Coupling: atmosphere → radiation, hydrology, fire
 
 ### 3.7 Ocean
-- [ ] **O0**: Slab mixed-layer + prescribed SST/sea-ice (1°, daily)
+- [x] **O0**: Slab mixed-layer + prescribed SST/sea-ice (1°, daily)
 - [ ] **O1**: z-coordinate regional (0.25°, hourly); thermohaline, mixed-layer, coastal
 - [ ] **O2**: Eddy-resolving MPAS-Ocean (1–10 km, min); mesoscale, ocean biogeochem — *(stretch)*
 - [ ] Coupling: ocean ↔ atmosphere, cryosphere
 
 ### 3.8 Cryosphere
-- [ ] **C0**: Degree-day melt (km, daily); snowpack SWE, simple glacier mass balance
+- [x] **C0**: Degree-day melt (km, daily); snowpack SWE, simple glacier mass balance
 - [ ] **C1**: Energy-balance snow (multi-layer, 30–300 m, hourly) + sea-ice thermo; albedo feedbacks
 - [ ] **C2**: Dynamic ice-sheet + sea-ice rheology (10 km, min) — *(stretch)*
 - [ ] Coupling: cryosphere → hydrology, ocean, atmosphere
 
 ### 3.9 Human Systems (MSD)
-- [ ] **HS0**: Exogenous scenarios (SSPs/RCPs, national, annual)
+- [x] **HS0**: Exogenous scenarios (SSPs/RCPs, national, annual)
 - [ ] **HS1**: Sectoral demand/supply (energy, water, agriculture; regional, monthly; reads climate impacts)
 - [ ] **HS2**: Agent-based infrastructure (power grid, water, transport; county, hourly; cascading failure) — *(stretch)*
 - [ ] **HS3**: Fully coupled IAM (global economy + technology + emissions) — *(stretch)*
 - [ ] Coupling: human ↔ hydrology, ecology, atmosphere
 
 ### 3.10 Trophic Dynamics
-- [ ] **TD0**: Static food-web topology + fixed trophic efficiencies (biome, annual)
+- [x] **TD0**: Static food-web topology + fixed trophic efficiencies (biome, annual)
 - [ ] **TD1**: Dynamic multi-guild Lotka-Volterra (landscape, monthly); Holling II/III, allometric scaling, density-dependent mortality
 - [ ] **TD2**: Individual-based predator-prey with body-size structure (patch, daily) — *(stretch)*
 - [ ] Coupling: trophic ↔ ecology, biogeochem, evolution, hydrology, ocean
 - [ ] Validation: GBIF, eBird, NEON, FAO fisheries, stable isotope studies, biomass pyramids
 
 ### 3.11 Evolution
-- [ ] **EV0**: Fixed trait distributions (PFT level, static)
+- [x] **EV0**: Fixed trait distributions (PFT level, static)
 - [ ] **EV1**: Trait-mediated assembly + adaptive shifts (population, decadal); SLA, wood density, seed mass, drought/fire tolerance, thermal optimum
 - [ ] **EV2**: Genotype-phenotype + selection + speciation (individual, generational); quantitative genetics — *(stretch)*
 - [ ] Coupling: evolution ↔ ecology, trophic, disturbance, biogeochem
@@ -205,16 +205,16 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 - [x] Schema files: `process_schema.yaml`, `dataset_schema.yaml`, `metric_schema.yaml`, `cross_domain_schema.yaml`, `geoengineering_schema.yaml`, `planetary_defense_schema.yaml`
 
 ### 4.2 Geoengineering Ontology Domain
-- [ ] Classes: `Intervention`, `ControlTarget`, `InterventionSchedule`, `SideEffectConstraint`, `TerminationScenario`, `StrategyRecord`, `InterventionCostModel`
-- [ ] Relations: `actuates_via → ProcessFamily`, `measured_by → Observable`, `evaluated_by → ScoringProtocol`, `monitors → Observable`, `tests → StrategyRecord`
-- [ ] Initial intervention manifests: SAI (SO₂, CaCO₃), MCB, OAE (olivine, lime), DAC, SRM, iron fertilization
-- [ ] Control targets: T_global, T_Arctic, pH_ocean, RF_total, precipitation_regional
+- [x] Classes: `Intervention`, `ControlTarget`, `InterventionSchedule`, `SideEffectConstraint`, `TerminationScenario`, `StrategyRecord`, `InterventionCostModel`
+- [x] Relations: `actuates_via → ProcessFamily`, `measured_by → Observable`, `evaluated_by → ScoringProtocol`, `monitors → Observable`, `tests → StrategyRecord`
+- [x] Initial intervention manifests: SAI (SO₂, CaCO₃), MCB, OAE (olivine, lime), DAC, SRM, iron fertilization
+- [x] Control targets: T_global, T_Arctic, pH_ocean, RF_total, precipitation_regional
 
 ### 4.3 Planetary Defense Ontology Domain
-- [ ] Classes: `NearEarthObject`, `ImpactScenario`, `ExtinctionEvent`, `DeflectionStrategy`, `ThreatAssessment`, `BiosphereImpact`, `RecoveryTrajectory`
-- [ ] Relations: `triggers → ProcessFamily`, `calibrates → ImpactScenario`, `assessed_by → ThreatAssessment`, `mitigates → NearEarthObject`, `modeled_by → (Trophic, Evolution, Ecology, Biogeochem)`, `validated_by → ExtinctionEvent`
-- [ ] Historical extinction records: K-Pg, P-T, Late Devonian, End-Triassic, End-Ordovician
-- [ ] NEO data sources: CNEOS Sentry, Scout, Horizons, MPC, ATLAS, CSS, Pan-STARRS, LSST/Rubin
+- [x] Classes: `NearEarthObject`, `ImpactScenario`, `ExtinctionEvent`, `DeflectionStrategy`, `ThreatAssessment`, `BiosphereImpact`, `RecoveryTrajectory`
+- [x] Relations: `triggers → ProcessFamily`, `calibrates → ImpactScenario`, `assessed_by → ThreatAssessment`, `mitigates → NearEarthObject`, `modeled_by → (Trophic, Evolution, Ecology, Biogeochem)`, `validated_by → ExtinctionEvent`
+- [x] Historical extinction records: K-Pg, P-T, Late Devonian, End-Triassic, End-Ordovician
+- [x] NEO data sources: CNEOS Sentry, Scout, Horizons, MPC, ATLAS, CSS, Pan-STARRS, LSST/Rubin
 
 ### 4.4 Initial Population
 - [x] Catalog 30–60 processes; define 2 rungs each for ~15 key processes
@@ -345,12 +345,12 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 ## Phase 6 — Data Plane
 
 ### 6.1 Data Ontology
-- [ ] Primitives: `Observable`, `Product`, `AccessMethod`, `License`, `LatencyClass`, `TransformRecipe`, `QualityFlags`
-- [ ] Link to process ontology: each Representation declares required observables + resolution + uncertainty tolerance
+- [x] Primitives: `Observable`, `Product`, `AccessMethod`, `License`, `LatencyClass`, `TransformRecipe`, `QualityFlags`
+- [x] Link to process ontology: each Representation declares required observables + resolution + uncertainty tolerance
 
 ### 6.2 Data Contract Schema
-- [ ] `DataSpec`: variable, topology, extent, time range, cadence, latency, quality, provenance
-- [ ] `DataArtifact`: URI, format (COG/Zarr/NetCDF), chunking, QA mask, uncertainty, checksum, provenance
+- [x] `DataSpec`: variable, topology, extent, time range, cadence, latency, quality, provenance
+- [x] `DataArtifact`: URI, format (COG/Zarr/NetCDF), chunking, QA mask, uncertainty, checksum, provenance
 
 ### 6.3 Data Agents
 - [ ] **Data Requirements** — IR → acquisition plan

@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tracing::info;
 
-use crate::events::{Event, EventBus, EventKind};
+use crate::events::{EventBus, EventKind};
 use crate::state::SimulationState;
 use maesma_core::families::ProcessFamily;
 use maesma_core::process::FidelityRung;

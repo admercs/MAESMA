@@ -238,12 +238,118 @@ impl ProcessRunner for LandUseChange {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// R0: Prescribed Land-Use Scenarios
+// ───────────────────────────────────────────────────────────────────
+
+/// Prescribed exogenous land-use scenario model (R0).
+///
+/// Reads land-use fractions from a pre-specified scenario trajectory
+/// and applies them directly — no interactive dynamics.
+///
+/// **Inputs**: `land_use_fractions` (prescribed scenario)
+/// **Outputs**: `land_use_fractions` (pass-through), `harvest_rate`, `fertilizer_application`
+pub struct PrescribedLandUse {
+    /// Number of land-use classes.
+    pub num_classes: usize,
+    /// Base harvest rate [kg m⁻² yr⁻¹]
+    pub base_harvest: f64,
+    /// Base fertiliser rate [kg N m⁻² yr⁻¹]
+    pub base_fertilizer: f64,
+}
+
+impl Default for PrescribedLandUse {
+    fn default() -> Self {
+        Self {
+            num_classes: N_CLASSES,
+            base_harvest: 0.5,
+            base_fertilizer: 0.01,
+        }
+    }
+}
+
+impl ProcessRunner for PrescribedLandUse {
+    fn family(&self) -> ProcessFamily {
+        ProcessFamily::HumanSystems
+    }
+
+    fn rung(&self) -> FidelityRung {
+        FidelityRung::R0
+    }
+
+    fn inputs(&self) -> Vec<String> {
+        vec!["land_use_fractions".into()]
+    }
+
+    fn outputs(&self) -> Vec<String> {
+        vec![
+            "land_use_fractions".into(),
+            "harvest_rate".into(),
+            "fertilizer_application".into(),
+        ]
+    }
+
+    fn conserved_quantities(&self) -> Vec<String> {
+        vec!["area".into()]
+    }
+
+    fn step(&mut self, state: &mut dyn ProcessState, _dt: f64) -> maesma_core::Result<()> {
+        // R0 is prescribed: just diagnose harvest/fertiliser from current fractions
+        let frac_field = state
+            .get_field("land_use_fractions")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: land_use_fractions".into()))?
+            .clone();
+
+        let n = self.num_classes;
+        let frac_data = frac_field.as_slice().unwrap_or(&[]);
+        let n_cells = if n > 0 { frac_data.len() / n } else { 0 };
+
+        let mut harvest = vec![0.0f64; n_cells];
+        let mut fert = vec![0.0f64; n_cells];
+
+        for c in 0..n_cells {
+            let start = c * n;
+            let crop_frac = if start + CROPLAND < frac_data.len() {
+                frac_data[start + CROPLAND]
+            } else {
+                0.0
+            };
+            harvest[c] = self.base_harvest * crop_frac;
+            fert[c] = self.base_fertilizer * crop_frac;
+        }
+
+        macro_rules! write_field {
+            ($name:expr, $vals:expr) => {
+                if let Some(f) = state.get_field_mut($name) {
+                    if let Some(sl) = f.as_slice_mut() {
+                        for (o, v) in sl.iter_mut().zip($vals.iter()) {
+                            *o = *v;
+                        }
+                    }
+                }
+            };
+        }
+        write_field!("harvest_rate", harvest);
+        write_field!("fertilizer_application", fert);
+
+        Ok(())
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
 // Tests
 // ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_prescribed_diagnoses_harvest() {
+        let m = PrescribedLandUse::default();
+        // With 50% cropland the harvest should be 0.25
+        let harvest = m.base_harvest * 0.5;
+        assert!((harvest - 0.25).abs() < 1e-10);
+    }
 
     #[test]
     fn test_fractions_sum_to_one() {

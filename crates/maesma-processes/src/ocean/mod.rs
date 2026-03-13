@@ -225,6 +225,106 @@ impl ProcessRunner for MixedLayerOcean {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// R0: Slab Ocean (prescribed Q-flux)
+// ───────────────────────────────────────────────────────────────────
+
+/// Slab (mixed-layer) ocean model with prescribed Q-flux (R0).
+///
+/// Evolves SST as:
+///   dT/dt = (Q_net + Q_flux) / (ρ_w · c_w · h)
+///
+/// where Q_net is the net surface heat flux, Q_flux is a prescribed ocean
+/// heat transport convergence (Q-flux), and h is the mixed-layer depth.
+///
+/// **Inputs**: `sst`, `net_heat_flux`, `q_flux` (prescribed)
+/// **Outputs**: `sst` (updated), `ocean_heat_content`
+pub struct SlabOcean {
+    /// Mixed-layer depth [m]
+    pub depth: f64,
+}
+
+impl Default for SlabOcean {
+    fn default() -> Self {
+        Self { depth: 50.0 }
+    }
+}
+
+impl ProcessRunner for SlabOcean {
+    fn family(&self) -> ProcessFamily {
+        ProcessFamily::Ocean
+    }
+
+    fn rung(&self) -> FidelityRung {
+        FidelityRung::R0
+    }
+
+    fn inputs(&self) -> Vec<String> {
+        vec!["sst".into(), "net_heat_flux".into()]
+    }
+
+    fn outputs(&self) -> Vec<String> {
+        vec!["sst".into(), "ocean_heat_content".into()]
+    }
+
+    fn conserved_quantities(&self) -> Vec<String> {
+        vec!["energy".into()]
+    }
+
+    fn step(&mut self, state: &mut dyn ProcessState, dt: f64) -> maesma_core::Result<()> {
+        let sst = state
+            .get_field("sst")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: sst".into()))?
+            .clone();
+        let flux = state
+            .get_field("net_heat_flux")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: net_heat_flux".into()))?
+            .clone();
+
+        let n = sst.len();
+        let sst_sl = sst.as_slice().unwrap_or(&[]);
+        let flux_sl = flux.as_slice().unwrap_or(&[]);
+        let len = n.min(sst_sl.len()).min(flux_sl.len());
+
+        // Optional prescribed Q-flux
+        let qflux_field = state.get_field("q_flux");
+
+        let rho_cw_h = RHO_SW * CP_SW * self.depth; // J m⁻² K⁻¹
+
+        let mut sst_out = vec![0.0f64; len];
+        let mut ohc_out = vec![0.0f64; len];
+
+        for i in 0..len {
+            let t = sst_sl[i];
+            let q_net = flux_sl[i];
+            let q_flux = qflux_field
+                .and_then(|f| f.as_slice())
+                .and_then(|s| s.get(i).copied())
+                .unwrap_or(0.0);
+
+            let dt_sst = (q_net + q_flux) / rho_cw_h * dt;
+            sst_out[i] = t + dt_sst;
+            ohc_out[i] = rho_cw_h * sst_out[i]; // absolute OHC proxy [J m⁻²]
+        }
+
+        macro_rules! write_field {
+            ($name:expr, $vals:expr) => {
+                if let Some(f) = state.get_field_mut($name) {
+                    if let Some(sl) = f.as_slice_mut() {
+                        for (o, v) in sl.iter_mut().zip($vals.iter()) {
+                            *o = *v;
+                        }
+                    }
+                }
+            };
+        }
+        write_field!("sst", sst_out);
+        write_field!("ocean_heat_content", ohc_out);
+
+        Ok(())
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
 // Tests
 // ───────────────────────────────────────────────────────────────────
 

@@ -138,12 +138,146 @@ impl ProcessRunner for StochasticFireRegime {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// Fuel Moisture Model
+// ───────────────────────────────────────────────────────────────────
+
+/// Fuel-moisture drying model (Nelson 2000 / Van Wagner 1987).
+///
+/// Implements the exponential drying/wetting response of dead fine fuels:
+///   dM/dt = (M_eq − M) / τ_resp
+///
+/// where M_eq is the equilibrium moisture content (from temperature and
+/// relative humidity via the Anderson 1990 tables) and τ_resp is the
+/// response time constant (1-hr, 10-hr, etc.).
+pub struct FuelMoistureModel {
+    /// Response time constant [s]
+    pub response_time: f64,
+}
+
+impl Default for FuelMoistureModel {
+    fn default() -> Self {
+        Self {
+            response_time: 3600.0, // 1-hour fuels
+        }
+    }
+}
+
+impl FuelMoistureModel {
+    /// Equilibrium moisture content from temperature [°C] and relative humidity [0-1].
+    /// Anderson (1990) approximation.
+    pub fn equilibrium_moisture(temp_c: f64, rh: f64) -> f64 {
+        let rh_pct = (rh * 100.0).clamp(0.0, 100.0);
+        let emc_pct = if rh_pct < 10.0 {
+            0.03229 + 0.281073 * rh_pct - temp_c * 0.000578
+        } else if rh_pct < 50.0 {
+            2.22749 + 0.160107 * rh_pct - 0.01478 * temp_c
+        } else {
+            21.0606 + 0.005565 * rh_pct.powi(2) - 0.00035 * rh_pct * temp_c - 0.483199 * rh_pct
+        };
+        emc_pct / 100.0
+    }
+
+    /// Advance fuel moisture towards equilibrium by dt seconds.
+    pub fn step_moisture(&self, current_m: f64, m_eq: f64, dt: f64) -> f64 {
+        let factor = (-dt / self.response_time).exp();
+        m_eq + (current_m - m_eq) * factor
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// Fire Disturbance Output
+// ───────────────────────────────────────────────────────────────────
+
+/// Diagnosed fire disturbance effects on vegetation and soil.
+#[derive(Debug, Clone, Default)]
+pub struct FireDisturbanceOutput {
+    /// Burn severity index [0-1] per cell
+    pub severity: Vec<f64>,
+    /// Carbon emitted [kg C m⁻² s⁻¹]
+    pub carbon_emissions: Vec<f64>,
+    /// Fuel consumed [kg m⁻²]
+    pub fuel_consumed: Vec<f64>,
+}
+
+impl FireDisturbanceOutput {
+    /// Diagnose disturbance effects from burned area fraction and fuel load.
+    pub fn diagnose(burned_frac: &[f64], fuel_load: &[f64]) -> Self {
+        let n = burned_frac.len().min(fuel_load.len());
+        let mut severity = vec![0.0f64; n];
+        let mut emissions = vec![0.0f64; n];
+        let mut consumed = vec![0.0f64; n];
+
+        for i in 0..n {
+            let bf = burned_frac[i].clamp(0.0, 1.0);
+            let fl = fuel_load[i].max(0.0);
+
+            // Severity proportional to burned fraction
+            severity[i] = bf;
+            // Combustion completeness ~ 0.5 for surface fires
+            let completeness = 0.5;
+            consumed[i] = bf * fl * completeness;
+            // Carbon ≈ 45% of dry biomass
+            emissions[i] = consumed[i] * 0.45;
+        }
+
+        Self {
+            severity,
+            carbon_emissions: emissions,
+            fuel_consumed: consumed,
+        }
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
 // Tests
 // ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_fuel_moisture_drying() {
+        let fm = FuelMoistureModel::default();
+        let m_eq = 0.05;
+        let current = 0.30;
+        let new_m = fm.step_moisture(current, m_eq, 7200.0); // 2 hours
+        assert!(new_m < current, "Fuel should dry: {new_m} < {current}");
+        assert!(new_m > m_eq, "Should not reach equilibrium in 2h: {new_m}");
+    }
+
+    #[test]
+    fn test_fuel_moisture_wetting() {
+        let fm = FuelMoistureModel::default();
+        let m_eq = 0.25;
+        let current = 0.05;
+        let new_m = fm.step_moisture(current, m_eq, 7200.0);
+        assert!(new_m > current, "Fuel should wet: {new_m} > {current}");
+    }
+
+    #[test]
+    fn test_equilibrium_moisture_ranges() {
+        // Hot dry: low EMC
+        let emc_dry = FuelMoistureModel::equilibrium_moisture(35.0, 0.1);
+        assert!(emc_dry < 0.10, "Hot+dry: EMC should be low: {emc_dry}");
+        // Cool humid: high EMC
+        let emc_wet = FuelMoistureModel::equilibrium_moisture(10.0, 0.9);
+        assert!(
+            emc_wet > emc_dry,
+            "Cool+humid > hot+dry: {emc_wet} vs {emc_dry}"
+        );
+    }
+
+    #[test]
+    fn test_disturbance_output_scales() {
+        let bf = vec![0.0, 0.5, 1.0];
+        let fl = vec![2.0, 2.0, 2.0];
+        let out = FireDisturbanceOutput::diagnose(&bf, &fl);
+        assert_eq!(out.severity[0], 0.0);
+        assert!((out.severity[1] - 0.5).abs() < 1e-10);
+        assert!((out.severity[2] - 1.0).abs() < 1e-10);
+        assert!(out.carbon_emissions[2] > out.carbon_emissions[1]);
+    }
 
     #[test]
     fn test_fuel_factor_below_threshold() {

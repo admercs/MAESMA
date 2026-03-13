@@ -197,6 +197,77 @@ impl ProcessRunner for QuantitativeGeneticsEvolution {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// R0: Fixed Traits (No Evolution)
+// ───────────────────────────────────────────────────────────────────
+
+/// Fixed-trait model with no evolutionary dynamics (R0).
+///
+/// Traits remain constant. Response to selection is zero.
+///
+/// **Inputs**: `trait_mean`, `trait_variance`
+/// **Outputs**: `trait_mean`, `trait_variance`, `genetic_variance`, `response_to_selection`
+pub struct FixedTraits;
+
+impl Default for FixedTraits {
+    fn default() -> Self {
+        Self
+    }
+}
+
+impl ProcessRunner for FixedTraits {
+    fn family(&self) -> ProcessFamily {
+        ProcessFamily::Evolution
+    }
+
+    fn rung(&self) -> FidelityRung {
+        FidelityRung::R0
+    }
+
+    fn inputs(&self) -> Vec<String> {
+        vec!["trait_mean".into(), "trait_variance".into()]
+    }
+
+    fn outputs(&self) -> Vec<String> {
+        vec![
+            "trait_mean".into(),
+            "trait_variance".into(),
+            "genetic_variance".into(),
+            "response_to_selection".into(),
+        ]
+    }
+
+    fn conserved_quantities(&self) -> Vec<String> {
+        vec![]
+    }
+
+    fn step(&mut self, state: &mut dyn ProcessState, _dt: f64) -> maesma_core::Result<()> {
+        // R0: no evolution, zero response
+        let mean_field = state
+            .get_field("trait_mean")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: trait_mean".into()))?
+            .clone();
+        let len = mean_field.len();
+        let zeros = vec![0.0f64; len];
+
+        macro_rules! write_field {
+            ($name:expr, $vals:expr) => {
+                if let Some(f) = state.get_field_mut($name) {
+                    if let Some(sl) = f.as_slice_mut() {
+                        for (o, v) in sl.iter_mut().zip($vals.iter()) {
+                            *o = *v;
+                        }
+                    }
+                }
+            };
+        }
+        write_field!("genetic_variance", zeros);
+        write_field!("response_to_selection", zeros);
+
+        Ok(())
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
 // Tests
 // ───────────────────────────────────────────────────────────────────
 

@@ -220,6 +220,126 @@ impl ProcessRunner for CohortVegetation {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// R0: Big-Leaf Static Vegetation
+// ───────────────────────────────────────────────────────────────────
+
+/// Static big-leaf vegetation model (R0).
+///
+/// Diagnoses net primary productivity from temperature and precipitation
+/// using the Miami model (Lieth, 1975). LAI is prescribed as a constant.
+///
+/// **Inputs**: `temperature` [°C], `precipitation` [mm yr⁻¹ equivalent]
+/// **Outputs**: `npp` [kg C m⁻² s⁻¹], `lai` [m² m⁻²], `gpp` [kg C m⁻² s⁻¹]
+pub struct StaticVegetation {
+    /// Prescribed leaf area index [m² m⁻²]
+    pub lai: f64,
+    /// Maximum NPP [kg C m⁻² yr⁻¹] (Miami model)
+    pub npp_max: f64,
+    /// Autotrophic respiration fraction of GPP [-]
+    pub ra_fraction: f64,
+}
+
+impl Default for StaticVegetation {
+    fn default() -> Self {
+        Self {
+            lai: 4.0,
+            npp_max: 1.2, // typical temperate forest
+            ra_fraction: 0.5,
+        }
+    }
+}
+
+impl StaticVegetation {
+    /// Miami model temperature response: NPP_T = NPP_max / (1 + exp(1.315 − 0.119·T))
+    fn f_temperature(&self, t_celsius: f64) -> f64 {
+        self.npp_max / (1.0 + (1.315 - 0.119 * t_celsius).exp())
+    }
+
+    /// Miami model precipitation response: NPP_P = NPP_max · (1 − exp(−0.000664·P))
+    fn f_precipitation(&self, p_mm_yr: f64) -> f64 {
+        self.npp_max * (1.0 - (-0.000664 * p_mm_yr).exp())
+    }
+}
+
+impl ProcessRunner for StaticVegetation {
+    fn family(&self) -> ProcessFamily {
+        ProcessFamily::Ecology
+    }
+
+    fn rung(&self) -> FidelityRung {
+        FidelityRung::R0
+    }
+
+    fn inputs(&self) -> Vec<String> {
+        vec!["temperature".into(), "precipitation".into()]
+    }
+
+    fn outputs(&self) -> Vec<String> {
+        vec!["npp".into(), "lai".into(), "gpp".into()]
+    }
+
+    fn conserved_quantities(&self) -> Vec<String> {
+        vec!["carbon".into()]
+    }
+
+    fn step(&mut self, state: &mut dyn ProcessState, _dt: f64) -> maesma_core::Result<()> {
+        let temp = state
+            .get_field("temperature")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: temperature".into()))?
+            .clone();
+
+        let n = temp.len();
+        let temp_sl = temp.as_slice().unwrap_or(&[]);
+        let precip_field = state.get_field("precipitation");
+        let precip_default = ndarray::ArrayD::from_elem(ndarray::IxDyn(&[n]), 800.0);
+        let precip_sl = precip_field
+            .unwrap_or(&precip_default)
+            .as_slice()
+            .unwrap_or(&[]);
+
+        let secs_per_yr = 365.25 * 86400.0;
+        let len = n.min(temp_sl.len());
+
+        let mut npp_out = vec![0.0f64; len];
+        let mut lai_out = vec![0.0f64; len];
+        let mut gpp_out = vec![0.0f64; len];
+
+        for i in 0..len {
+            let t = temp_sl[i];
+            let p = precip_sl.get(i).copied().unwrap_or(800.0);
+
+            // Miami model: min(T-limited, P-limited) NPP
+            let npp_t = self.f_temperature(t);
+            let npp_p = self.f_precipitation(p);
+            let npp_yr = npp_t.min(npp_p).max(0.0); // kg C m⁻² yr⁻¹
+            let npp_s = npp_yr / secs_per_yr; // kg C m⁻² s⁻¹
+            let gpp_s = npp_s / (1.0 - self.ra_fraction);
+
+            npp_out[i] = npp_s;
+            gpp_out[i] = gpp_s;
+            lai_out[i] = self.lai;
+        }
+
+        macro_rules! write_field {
+            ($name:expr, $vals:expr) => {
+                if let Some(f) = state.get_field_mut($name) {
+                    if let Some(sl) = f.as_slice_mut() {
+                        for (o, v) in sl.iter_mut().zip($vals.iter()) {
+                            *o = *v;
+                        }
+                    }
+                }
+            };
+        }
+        write_field!("npp", npp_out);
+        write_field!("lai", lai_out);
+        write_field!("gpp", gpp_out);
+
+        Ok(())
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
 // Tests
 // ───────────────────────────────────────────────────────────────────
 

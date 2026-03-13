@@ -450,3 +450,225 @@ fn protocol_observable_lookup() {
     assert_eq!(streamflow.len(), 1);
     assert_eq!(streamflow[0].primary_metric, "kge");
 }
+
+// Round 5 integration tests
+
+#[test]
+fn refinement_engine_skill_upgrade_cycle() {
+    use maesma_core::families::ProcessFamily;
+    use maesma_core::process::FidelityRung;
+    use maesma_runtime::{RefinementAction, RefinementEngine, RefinementTrigger};
+
+    let mut engine = RefinementEngine::default();
+    let trigger = RefinementTrigger::SkillBelow {
+        family: ProcessFamily::Hydrology,
+        metric: "kge".into(),
+        threshold: 0.5,
+        current: 0.2,
+    };
+    let action = engine.evaluate(&trigger, FidelityRung::R0);
+    match action {
+        RefinementAction::Upgrade { from, to, .. } => {
+            assert_eq!(from, FidelityRung::R0);
+            assert_eq!(to, FidelityRung::R1);
+        }
+        _ => panic!("Expected upgrade from R0 to R1"),
+    }
+
+    let trigger2 = RefinementTrigger::SkillBelow {
+        family: ProcessFamily::Hydrology,
+        metric: "kge".into(),
+        threshold: 0.5,
+        current: 0.85,
+    };
+    let action2 = engine.evaluate(&trigger2, FidelityRung::R1);
+    assert!(matches!(action2, RefinementAction::Hold { .. }));
+    assert_eq!(engine.history.len(), 2);
+}
+
+#[test]
+fn disturbance_pipeline_multi_event() {
+    use maesma_core::families::ProcessFamily;
+    use maesma_runtime::{DisturbanceEvent, DisturbancePipeline, DisturbanceType};
+
+    let mut pipeline = DisturbancePipeline::new();
+    pipeline.queue(DisturbanceEvent {
+        source_family: ProcessFamily::Fire,
+        disturbance_type: DisturbanceType::Fire,
+        affected_cells: vec![0, 1],
+        severity: vec![0.9, 0.5],
+        step: 10,
+    });
+    pipeline.queue(DisturbanceEvent {
+        source_family: ProcessFamily::Hydrology,
+        disturbance_type: DisturbanceType::Flood,
+        affected_cells: vec![3, 4, 5],
+        severity: vec![1.0, 0.8, 0.6],
+        step: 10,
+    });
+    assert_eq!(pipeline.pending_count(), 2);
+    let mods = pipeline.process_pending();
+    assert_eq!(mods.len(), 5);
+    assert_eq!(pipeline.processed_count(), 2);
+}
+
+#[test]
+fn observation_point_extraction_integration() {
+    use maesma_runtime::PointExtractor;
+    let pe = PointExtractor::new((0.0, 0.0), (1.0, 1.0), (4, 4));
+    let grid_data = vec![
+        1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0,
+    ];
+    let val = pe.extract(&grid_data, 1.5, 1.5);
+    assert!(val.is_some());
+    let v = val.unwrap();
+    assert!(v > 6.0 && v < 11.0);
+}
+
+#[test]
+fn observation_spatial_average_integration() {
+    use maesma_core::observations::BoundingBox;
+    use maesma_runtime::SpatialAverager;
+    let avg = SpatialAverager::new((0.0, 0.0), (2.5, 2.5), (5, 5));
+    let grid = vec![100.0; 25];
+    let bbox = BoundingBox {
+        west: 0.0,
+        east: 10.0,
+        south: 0.0,
+        north: 10.0,
+    };
+    let result = avg.average(&grid, &bbox);
+    assert!(result.is_some());
+    assert!((result.unwrap() - 100.0).abs() < 1e-6);
+}
+
+#[test]
+fn skill_store_insert_query_roundtrip() {
+    use maesma_core::metrics::SkillMetrics;
+    use maesma_core::process::{FidelityRung, ProcessId};
+    use maesma_core::skills::SkillRecord;
+    use maesma_runtime::SkillScoreStore;
+
+    let mut store = SkillScoreStore::new();
+    let pid = ProcessId::new();
+    store.insert(SkillRecord {
+        process_id: pid.clone(),
+        rung: FidelityRung::R1,
+        region: "TestRegion".into(),
+        regime_tags: vec![],
+        season: None,
+        metrics: SkillMetrics {
+            rmse: Some(1.5),
+            kge: Some(0.85),
+            crps: None,
+            nse: Some(0.8),
+            bias: Some(0.02),
+            correlation: Some(0.9),
+            conservation_residual: None,
+            wall_time_per_cell: None,
+            custom: std::collections::HashMap::new(),
+        },
+        dataset: "FluxNet".into(),
+        evaluated_at: "2024-06-01".into(),
+        benchmark: None,
+        process_hash: None,
+    });
+    assert_eq!(store.count(), 1);
+    assert_eq!(store.query_by_region("TestRegion").len(), 1);
+    assert_eq!(store.above_kge_threshold(0.8).len(), 1);
+}
+
+#[test]
+fn data_contract_coupling_validation() {
+    use maesma_core::data_contracts::*;
+    use maesma_core::families::ProcessFamily;
+    use maesma_core::process::FidelityRung;
+    use maesma_core::units::PhysicalUnit;
+    use maesma_core::variables::VariableCategory;
+
+    let field = |name: &str| FieldSpec {
+        name: name.to_string(),
+        unit: PhysicalUnit::dimensionless(),
+        category: VariableCategory::Forcing,
+        ndim: 2,
+        required: true,
+        lower_bound: None,
+        upper_bound: None,
+        fill_value: None,
+    };
+    let tc = TemporalConstraint {
+        max_dt: 3600.0,
+        min_dt: 1.0,
+        supports_subcycling: true,
+        preferred_dt: 1800.0,
+    };
+
+    let producer = DataContract {
+        family: ProcessFamily::Atmosphere,
+        rung: FidelityRung::R0,
+        process_name: "BulkAtmo".into(),
+        version: "1.0".into(),
+        inputs: vec![],
+        outputs: vec![field("air_temperature"), field("precipitation")],
+        conserved: vec![],
+        temporal: tc.clone(),
+    };
+    let consumer = DataContract {
+        family: ProcessFamily::Hydrology,
+        rung: FidelityRung::R1,
+        process_name: "Richards".into(),
+        version: "1.0".into(),
+        inputs: vec![field("air_temperature"), field("precipitation")],
+        outputs: vec![],
+        conserved: vec![],
+        temporal: tc,
+    };
+    assert!(matches!(
+        validate_coupling(&producer, &consumer),
+        ContractValidation::Compatible
+    ));
+}
+
+#[test]
+fn all_r0_processes_step_without_panic() {
+    use maesma_processes::create_default_runners;
+    use maesma_runtime::state::SimulationState;
+
+    let runners = create_default_runners();
+    assert!(
+        runners.len() >= 11,
+        "Should have at least 11 default runners"
+    );
+    let mut state = SimulationState::new(5, 5);
+
+    // Seed all fields that R0 processes require
+    state.init_field_const("fuel_load", 0.5);
+    state.init_field_const("weather_fire_danger_index", 0.3);
+    state.init_field_const("precipitation", 2.0);
+    state.init_field_const("potential_et", 1.0);
+    state.init_field_const("soil_moisture", 0.3);
+    state.init_field_const("sw_down", 200.0);
+    state.init_field_const("lai", 3.0);
+    state.init_field_const("albedo_soil", 0.2);
+    state.init_field_const("temperature", 288.0);
+    state.init_field_const("soil_carbon", 5.0);
+    state.init_field_const("litter_input", 0.01);
+    state.init_field_const("moisture", 0.4);
+    state.init_field_const("wind_speed", 3.0);
+    state.init_field_const("temperature_air", 290.0);
+    state.init_field_const("temperature_surface", 292.0);
+    state.init_field_const("sst", 288.0);
+    state.init_field_const("net_heat_flux", 50.0);
+    state.init_field_const("snow_water_equivalent", 10.0);
+    state.init_field_const("land_use_fractions", 0.5);
+    state.init_field_const("prey_biomass", 100.0);
+    state.init_field_const("trait_mean", 1.0);
+
+    for (family, _rung, mut runner) in runners {
+        let mut adapter = maesma_runtime::state::ProcessStateAdapter::new(&mut state);
+        runner
+            .step(&mut adapter, 3600.0)
+            .unwrap_or_else(|e| panic!("{:?} R0 step failed: {e}", family));
+        adapter.sync_back();
+    }
+}

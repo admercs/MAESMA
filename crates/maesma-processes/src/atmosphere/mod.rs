@@ -264,12 +264,150 @@ impl ProcessRunner for MoninObukhovSurfaceLayer {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// R0: Bulk Transfer Coefficients
+// ───────────────────────────────────────────────────────────────────
+
+/// Bulk aerodynamic transfer model (R0).
+///
+/// Computes turbulent fluxes using constant neutral bulk transfer coefficients
+/// without iterative stability corrections.
+///
+///   H  = ρ · Cp · C_H · U · (T_s − T_a)
+///   LE = ρ · Lv · C_E · U · (q_s − q_a)
+///
+/// **Inputs**: `wind_speed`, `temperature_air`, `temperature_surface`,
+///   `humidity`, `humidity_surface`
+/// **Outputs**: `sensible_heat_flux`, `latent_heat_flux`, `friction_velocity`
+pub struct BulkTransferAtmosphere {
+    /// Bulk transfer coefficient for heat [-]
+    pub c_h: f64,
+    /// Bulk transfer coefficient for moisture [-]
+    pub c_e: f64,
+    /// Drag coefficient for momentum [-]
+    pub c_d: f64,
+}
+
+impl Default for BulkTransferAtmosphere {
+    fn default() -> Self {
+        Self {
+            c_h: 3.0e-3,
+            c_e: 3.0e-3,
+            c_d: 3.0e-3,
+        }
+    }
+}
+
+impl ProcessRunner for BulkTransferAtmosphere {
+    fn family(&self) -> ProcessFamily {
+        ProcessFamily::Atmosphere
+    }
+
+    fn rung(&self) -> FidelityRung {
+        FidelityRung::R0
+    }
+
+    fn inputs(&self) -> Vec<String> {
+        vec![
+            "wind_speed".into(),
+            "temperature_air".into(),
+            "temperature_surface".into(),
+        ]
+    }
+
+    fn outputs(&self) -> Vec<String> {
+        vec![
+            "sensible_heat_flux".into(),
+            "latent_heat_flux".into(),
+            "friction_velocity".into(),
+        ]
+    }
+
+    fn conserved_quantities(&self) -> Vec<String> {
+        vec!["energy".into()]
+    }
+
+    fn step(&mut self, state: &mut dyn ProcessState, _dt: f64) -> maesma_core::Result<()> {
+        let wind = state
+            .get_field("wind_speed")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: wind_speed".into()))?
+            .clone();
+        let t_air = state
+            .get_field("temperature_air")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: temperature_air".into()))?
+            .clone();
+        let t_sfc = state
+            .get_field("temperature_surface")
+            .ok_or_else(|| {
+                maesma_core::Error::Runtime("missing field: temperature_surface".into())
+            })?
+            .clone();
+
+        let n = wind.len();
+        let w_sl = wind.as_slice().unwrap_or(&[]);
+        let ta_sl = t_air.as_slice().unwrap_or(&[]);
+        let ts_sl = t_sfc.as_slice().unwrap_or(&[]);
+        let len = n.min(w_sl.len()).min(ta_sl.len()).min(ts_sl.len());
+
+        // Optional humidity fields
+        let qa_field = state.get_field("humidity");
+        let qs_field = state.get_field("humidity_surface");
+
+        let mut h_out = vec![0.0f64; len];
+        let mut le_out = vec![0.0f64; len];
+        let mut ustar_out = vec![0.0f64; len];
+
+        for i in 0..len {
+            let u = w_sl[i].max(0.1);
+            let ta = ta_sl[i];
+            let ts = ts_sl[i];
+
+            h_out[i] = RHO_AIR * CP_AIR * self.c_h * u * (ts - ta);
+
+            let qa = qa_field
+                .and_then(|f| f.as_slice())
+                .and_then(|s| s.get(i).copied())
+                .unwrap_or(0.01);
+            let qs = qs_field
+                .and_then(|f| f.as_slice())
+                .and_then(|s| s.get(i).copied())
+                .unwrap_or(0.01);
+            le_out[i] = RHO_AIR * LV * self.c_e * u * (qs - qa);
+            ustar_out[i] = (self.c_d * u * u).sqrt();
+        }
+
+        macro_rules! write_field {
+            ($name:expr, $vals:expr) => {
+                if let Some(f) = state.get_field_mut($name) {
+                    if let Some(sl) = f.as_slice_mut() {
+                        for (o, v) in sl.iter_mut().zip($vals.iter()) {
+                            *o = *v;
+                        }
+                    }
+                }
+            };
+        }
+        write_field!("sensible_heat_flux", h_out);
+        write_field!("latent_heat_flux", le_out);
+        write_field!("friction_velocity", ustar_out);
+
+        Ok(())
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
 // Tests
 // ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_bulk_transfer_positive_h() {
+        let m = BulkTransferAtmosphere::default();
+        let h = RHO_AIR * CP_AIR * m.c_h * 5.0 * (310.0 - 290.0);
+        assert!(h > 0.0, "Warm surface → positive H: {h}");
+    }
 
     #[test]
     fn test_neutral_u_star() {

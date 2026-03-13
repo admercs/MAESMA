@@ -1,0 +1,296 @@
+# Planetary Defense Domain Ontology Schema
+# Defines processes, state variables, and coupling relations for
+# asteroid/comet impact scenarios and their Earth system consequences.
+
+classes:
+  ImpactScenario:
+    description: "A hypothetical or historical bolide impact event"
+    properties:
+      name: { type: string, required: true }
+      impactor_diameter: { type: float, unit: meters, required: true }
+      impactor_velocity: { type: float, unit: "km/s", required: true }
+      impactor_density: { type: float, unit: "kg/m³" }
+      impact_angle: { type: float, unit: degrees, range: "[0, 90]" }
+      impact_location: { type: ImpactLocation }
+      impact_energy: { type: float, unit: "Mt TNT" }
+      torino_scale: { type: integer, range: "[0, 10]" }
+      palermo_scale: { type: float }
+
+  ImpactLocation:
+    description: "Where the impactor strikes"
+    properties:
+      latitude: { type: float, range: "[-90, 90]" }
+      longitude: { type: float, range: "[-180, 180]" }
+      surface_type: { type: SurfaceType, required: true }
+      water_depth: { type: float, unit: meters, description: "If ocean impact" }
+
+  SurfaceType:
+    description: "Type of surface struck by impactor"
+    instances: [DeepOcean, ShallowOcean, Continental, IceSheet, Desert, Forest]
+
+  ImpactConsequence:
+    description: "A physical consequence of the impact event"
+    properties:
+      name: { type: string, required: true }
+      category: { type: ConsequenceCategory, required: true }
+      timescale: { type: Timescale }
+      spatial_extent: { type: SpatialExtent }
+      affected_families: { type: "list[ProcessFamily]" }
+
+  ConsequenceCategory:
+    description: "Category of impact consequence"
+    instances:
+      - ThermalRadiation      # Fireball, re-entry heating
+      - ShockWave             # Air blast, seismic shaking
+      - Ejecta                # Ballistic ejecta, re-entry heating
+      - Tsunami               # Impact-generated ocean waves
+      - Dust                  # Stratospheric dust veil, impact winter
+      - ChemicalPerturbation  # NOx production, ozone destruction
+      - Wildfire              # Global firestorms from thermal radiation
+      - Acidification         # Nitric acid rain
+
+  Timescale:
+    description: "Duration of the consequence"
+    instances:
+      - Instantaneous   # seconds to minutes
+      - Hours           # hours to day
+      - Weeks           # days to weeks
+      - Months          # weeks to months
+      - Years           # months to decades
+      - Centuries       # decades to centuries
+
+  SpatialExtent:
+    description: "Spatial footprint of the consequence"
+    instances: [PointSource, Local, Regional, Hemispheric, Global]
+
+  DeflectionMethod:
+    description: "A planetary defense technique to prevent impact"
+    properties:
+      name: { type: string, required: true }
+      method_type: { type: DeflectionType }
+      lead_time_required: { type: float, unit: years }
+      max_impactor_diameter: { type: float, unit: meters }
+      technology_readiness_level: { type: integer, range: "[1, 9]" }
+
+  DeflectionType:
+    description: "Category of deflection approach"
+    instances:
+      - KineticImpactor      # e.g., DART mission
+      - GravityTractor        # Spacecraft hovering nearby
+      - NuclearStandoff       # Nuclear device detonation near surface
+      - IonBeamDeflection     # Focused ion beam
+      - LaserAblation         # Concentrated laser heating
+      - MassDriver            # Ejecting material from surface
+
+# ----- Impact Consequence Chains -----
+
+consequence_chains:
+  small_impactor:
+    description: "10-50m diameter, airburst or small crater"
+    example: "Chelyabinsk 2013 (20m), Tunguska 1908 (50m)"
+    consequences:
+      - { category: ShockWave, timescale: Instantaneous, extent: Local }
+      - { category: ThermalRadiation, timescale: Instantaneous, extent: Local }
+
+  city_killer:
+    description: "50-300m diameter, regional destruction"
+    example: "Meteor Crater (~50m iron)"
+    consequences:
+      - { category: ShockWave, timescale: Instantaneous, extent: Regional }
+      - { category: ThermalRadiation, timescale: Instantaneous, extent: Regional }
+      - { category: Ejecta, timescale: Hours, extent: Regional }
+      - { category: Tsunami, timescale: Hours, extent: Regional, condition: "ocean impact" }
+
+  global_catastrophe:
+    description: "1-10km diameter, climate-altering impact"
+    example: "Chicxulub impactor (~10km)"
+    consequences:
+      - { category: ShockWave, timescale: Instantaneous, extent: Global }
+      - { category: ThermalRadiation, timescale: Instantaneous, extent: Hemispheric }
+      - { category: Ejecta, timescale: Hours, extent: Global }
+      - { category: Wildfire, timescale: Hours, extent: Global }
+      - { category: Dust, timescale: Months, extent: Global, description: "Impact winter" }
+      - { category: ChemicalPerturbation, timescale: Months, extent: Global }
+      - { category: Acidification, timescale: Years, extent: Global }
+      - { category: Tsunami, timescale: Hours, extent: Global, condition: "ocean impact" }
+
+# ----- Affected Process Families -----
+
+impact_process_coupling:
+  - consequence: Dust
+    affected_families:
+      - family: Radiation
+        mechanism: "Stratospheric dust reduces surface insolation by 50-90%"
+        variables_modified: [SWdown, diffuse_fraction, aerosol_optical_depth]
+        duration: "months to years"
+      - family: Atmosphere
+        mechanism: "Reduced surface temperature (impact winter)"
+        variables_modified: [air_temperature, precipitation]
+        duration: "years"
+      - family: Ecology
+        mechanism: "Collapse of photosynthesis, mass extinction"
+        variables_modified: [GPP, LAI, biomass]
+        duration: "decades"
+      - family: Ocean
+        mechanism: "SST cooling, reduced evaporation"
+        variables_modified: [SST, mixed_layer_temperature]
+        duration: "years"
+
+  - consequence: Wildfire
+    affected_families:
+      - family: Fire
+        mechanism: "Global firestorms from ejecta re-entry thermal pulse"
+        variables_modified: [burned_area, fire_intensity, combustion_completeness]
+        duration: "weeks"
+      - family: Ecology
+        mechanism: "Biomass destruction, habitat loss"
+        variables_modified: [biomass, LAI, species_richness]
+        duration: "centuries"
+      - family: Biogeochemistry
+        mechanism: "Massive carbon release, soot deposition"
+        variables_modified: [atmospheric_CO2, soil_carbon, black_carbon]
+        duration: "years"
+
+  - consequence: Tsunami
+    affected_families:
+      - family: Hydrology
+        mechanism: "Coastal inundation, saltwater intrusion"
+        variables_modified: [soil_moisture, water_table_depth, salinity]
+        duration: "months"
+      - family: Ocean
+        mechanism: "Massive wave propagation, shelf sediment resuspension"
+        variables_modified: [wave_height, turbidity]
+        duration: "weeks"
+      - family: HumanSystems
+        mechanism: "Coastal infrastructure destruction"
+        variables_modified: [population_displacement, economic_loss]
+        duration: "decades"
+
+  - consequence: ChemicalPerturbation
+    affected_families:
+      - family: Atmosphere
+        mechanism: "NOx production destroys 50-80% of ozone layer"
+        variables_modified: [ozone_column, UV_surface]
+        duration: "years"
+      - family: Biogeochemistry
+        mechanism: "Nitric acid rain acidifies soils and water bodies"
+        variables_modified: [soil_pH, water_pH, nitrogen_deposition]
+        duration: "years"
+
+  - consequence: Acidification
+    affected_families:
+      - family: Ocean
+        mechanism: "CO2 and acid rain lower ocean pH"
+        variables_modified: [pH, aragonite_saturation, calcification_rate]
+        duration: "centuries"
+      - family: TrophicDynamics
+        mechanism: "Shell-forming organism decline, food web disruption"
+        variables_modified: [species_biomass, trophic_level_productivity]
+        duration: "centuries"
+
+# ----- State Variables Specific to Impact Scenarios -----
+
+state_variables:
+  - name: ejecta_mass_loading
+    unit: "kg/m²"
+    category: DisturbanceState
+    description: "Mass of ballistic ejecta deposited per unit area"
+
+  - name: impact_dust_optical_depth
+    unit: dimensionless
+    category: DisturbanceState
+    description: "Optical depth of stratospheric dust from impact"
+
+  - name: thermal_radiation_flux
+    unit: "W/m²"
+    category: DisturbanceState
+    description: "Thermal radiation flux from fireball and ejecta re-entry"
+
+  - name: blast_overpressure
+    unit: "kPa"
+    category: DisturbanceState
+    description: "Peak overpressure from atmospheric shock wave"
+
+  - name: tsunami_wave_height
+    unit: meters
+    category: DisturbanceState
+    description: "Maximum tsunami wave height at coastline"
+
+  - name: soot_mass_column
+    unit: "kg/m²"
+    category: DisturbanceState
+    description: "Column-integrated soot mass from global firestorms"
+
+  - name: nox_injection_rate
+    unit: "Tg N/yr"
+    category: DisturbanceState
+    description: "Rate of NOx injection into stratosphere by impact"
+
+  - name: ozone_depletion_fraction
+    unit: dimensionless
+    category: DisturbanceState
+    description: "Fraction of ozone column destroyed by NOx chemistry"
+
+# ----- Reference Impact Scenarios for Simulation -----
+
+reference_scenarios:
+  tunguska_class:
+    impactor_diameter: 50     # meters
+    impactor_velocity: 15     # km/s
+    impactor_density: 3000    # kg/m³
+    impact_angle: 45
+    impact_energy: 10         # Mt TNT
+    surface_type: Continental
+    consequence_chain: small_impactor
+
+  city_killer_ocean:
+    impactor_diameter: 150
+    impactor_velocity: 20
+    impactor_density: 2500
+    impact_angle: 45
+    impact_energy: 300
+    surface_type: DeepOcean
+    consequence_chain: city_killer
+
+  chicxulub_analog:
+    impactor_diameter: 10000
+    impactor_velocity: 20
+    impactor_density: 2700
+    impact_angle: 60
+    impact_energy: 100000000  # 100 million Mt TNT
+    surface_type: ShallowOcean
+    consequence_chain: global_catastrophe
+
+  intermediate_threat:
+    impactor_diameter: 1000
+    impactor_velocity: 18
+    impactor_density: 3000
+    impact_angle: 45
+    impact_energy: 50000      # Mt TNT
+    surface_type: Continental
+    consequence_chain: global_catastrophe
+
+# ----- Deflection Methods Registry -----
+
+deflection_methods:
+  - name: Kinetic Impactor
+    method_type: KineticImpactor
+    lead_time_required: 5
+    max_impactor_diameter: 500
+    technology_readiness_level: 7
+    example: "NASA DART mission (2022)"
+    description: "Spacecraft impacts asteroid at high velocity to change orbit"
+
+  - name: Gravity Tractor
+    method_type: GravityTractor
+    lead_time_required: 20
+    max_impactor_diameter: 300
+    technology_readiness_level: 3
+    description: "Spacecraft hovers near asteroid; mutual gravity slowly deflects orbit"
+
+  - name: Nuclear Standoff Detonation
+    method_type: NuclearStandoff
+    lead_time_required: 1
+    max_impactor_diameter: 5000
+    technology_readiness_level: 4
+    description: "Nuclear device detonated near asteroid surface; ablation provides impulse"

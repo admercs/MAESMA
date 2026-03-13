@@ -337,12 +337,156 @@ impl ProcessRunner for TwoStreamRadiation {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// R0: Beer-Lambert Canopy Extinction
+// ───────────────────────────────────────────────────────────────────
+
+/// Beer-Lambert canopy radiation model (R0).
+///
+/// Simple exponential extinction of incoming shortwave radiation through a
+/// canopy described only by leaf area index (LAI) and an extinction coefficient.
+/// No waveband splitting or angular dependence.
+///
+/// **Inputs**: `sw_down` (total downwelling SW [W m⁻²]), `lai`, `albedo_soil`
+/// **Outputs**: `absorbed_par`, `absorbed_nir`, `reflected_sw`, `transmitted_par`, `transmitted_nir`
+pub struct BeerLambertRadiation {
+    /// Canopy extinction coefficient [-]
+    pub k_ext: f64,
+    /// Canopy reflection coefficient [-]
+    pub albedo_canopy: f64,
+}
+
+impl Default for BeerLambertRadiation {
+    fn default() -> Self {
+        Self {
+            k_ext: 0.5,
+            albedo_canopy: 0.15,
+        }
+    }
+}
+
+impl ProcessRunner for BeerLambertRadiation {
+    fn family(&self) -> ProcessFamily {
+        ProcessFamily::Radiation
+    }
+
+    fn rung(&self) -> FidelityRung {
+        FidelityRung::R0
+    }
+
+    fn inputs(&self) -> Vec<String> {
+        vec!["sw_down".into(), "lai".into(), "albedo_soil".into()]
+    }
+
+    fn outputs(&self) -> Vec<String> {
+        vec![
+            "absorbed_par".into(),
+            "absorbed_nir".into(),
+            "reflected_sw".into(),
+            "transmitted_par".into(),
+            "transmitted_nir".into(),
+        ]
+    }
+
+    fn conserved_quantities(&self) -> Vec<String> {
+        vec!["energy".into()]
+    }
+
+    fn step(&mut self, state: &mut dyn ProcessState, _dt: f64) -> maesma_core::Result<()> {
+        let sw = state
+            .get_field("sw_down")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: sw_down".into()))?
+            .clone();
+        let lai = state
+            .get_field("lai")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: lai".into()))?
+            .clone();
+        let albedo_soil = state
+            .get_field("albedo_soil")
+            .unwrap_or(&ndarray::ArrayD::from_elem(ndarray::IxDyn(&[1]), 0.2))
+            .clone();
+
+        let n = sw.len();
+        let sw_sl = sw.as_slice().unwrap_or(&[]);
+        let lai_sl = lai.as_slice().unwrap_or(&[]);
+        let alb_sl = albedo_soil.as_slice().unwrap_or(&[]);
+        let len = n.min(sw_sl.len()).min(lai_sl.len());
+
+        let mut abs_par = vec![0.0f64; len];
+        let mut abs_nir = vec![0.0f64; len];
+        let mut refl = vec![0.0f64; len];
+        let mut trans_par = vec![0.0f64; len];
+        let mut trans_nir = vec![0.0f64; len];
+
+        for i in 0..len {
+            let s = sw_sl[i].max(0.0);
+            let l = lai_sl[i].max(0.0);
+            let a_soil = alb_sl.get(i).copied().unwrap_or(0.2);
+
+            // Canopy-reflected
+            let reflected = s * self.albedo_canopy * (1.0 - (-self.k_ext * l).exp());
+            // Transmitted through canopy
+            let transmitted = s * (-self.k_ext * l).exp();
+            // Absorbed by canopy
+            let absorbed = (s - reflected - transmitted).max(0.0);
+            // Soil reflection of transmitted
+            let soil_refl = transmitted * a_soil;
+
+            // Split PAR / NIR equally for R0
+            abs_par[i] = absorbed * 0.5;
+            abs_nir[i] = absorbed * 0.5;
+            refl[i] = reflected + soil_refl;
+            trans_par[i] = transmitted * 0.5;
+            trans_nir[i] = transmitted * 0.5;
+        }
+
+        macro_rules! write_field {
+            ($name:expr, $vals:expr) => {
+                if let Some(f) = state.get_field_mut($name) {
+                    if let Some(sl) = f.as_slice_mut() {
+                        for (o, v) in sl.iter_mut().zip($vals.iter()) {
+                            *o = *v;
+                        }
+                    }
+                }
+            };
+        }
+        write_field!("absorbed_par", abs_par);
+        write_field!("absorbed_nir", abs_nir);
+        write_field!("reflected_sw", refl);
+        write_field!("transmitted_par", trans_par);
+        write_field!("transmitted_nir", trans_nir);
+
+        Ok(())
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
 // Tests
 // ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_beer_lambert_zero_lai() {
+        let m = BeerLambertRadiation::default();
+        let transmitted = 500.0 * (-m.k_ext * 0.0_f64).exp();
+        assert!(
+            (transmitted - 500.0).abs() < 1e-10,
+            "Zero LAI: all transmitted"
+        );
+    }
+
+    #[test]
+    fn test_beer_lambert_high_lai() {
+        let m = BeerLambertRadiation::default();
+        let transmitted = 500.0 * (-m.k_ext * 8.0_f64).exp();
+        assert!(
+            transmitted < 50.0,
+            "LAI=8 should strongly attenuate: {transmitted}"
+        );
+    }
 
     #[test]
     fn test_g_function_spherical() {

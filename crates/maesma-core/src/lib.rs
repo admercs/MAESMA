@@ -5,6 +5,7 @@
 //! abstractions that all other crates depend on.
 
 pub mod automaton;
+pub mod data_contracts;
 pub mod error;
 pub mod evolution;
 pub mod families;
@@ -23,6 +24,7 @@ pub mod units;
 pub mod variables;
 
 pub use automaton::{Constitution, HeartbeatConfig, ProcessAutomaton, ProcessSoul, SurvivalTier};
+pub use data_contracts::{DataContract, FieldSpec, validate_coupling};
 pub use error::{Error, Result};
 pub use evolution::{EvolutionCandidate, EvolutionConfig, Population, ProcessLineage};
 pub use families::ProcessFamily;

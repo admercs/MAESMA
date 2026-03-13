@@ -1,0 +1,263 @@
+# Geoengineering Domain Ontology Schema
+# Defines processes, state variables, and coupling relations for
+# Solar Radiation Management (SRM) and Carbon Dioxide Removal (CDR) scenarios.
+
+classes:
+  GeoEngineeringIntervention:
+    description: "A deliberate large-scale intervention in the Earth system"
+    properties:
+      name: { type: string, required: true }
+      category: { type: InterventionCategory, required: true }
+      description: { type: string }
+      deployment_scale: { type: DeploymentScale, required: true }
+      reversibility: { type: ReversibilityClass, required: true }
+      technology_readiness_level: { type: integer, range: "[1, 9]" }
+      side_effects: { type: "list[SideEffect]" }
+
+  InterventionCategory:
+    description: "Broad category of geoengineering intervention"
+    instances:
+      - SolarRadiationManagement
+      - CarbonDioxideRemoval
+      - WeatherModification
+      - OceanIntervention
+      - AlbedoModification
+
+  DeploymentScale:
+    description: "Spatial scale of deployment"
+    instances: [Local, Regional, Continental, Hemispheric, Global]
+
+  ReversibilityClass:
+    description: "How quickly effects dissipate once intervention stops"
+    instances:
+      - FastReversible      # < 1 year (e.g., stratospheric aerosol)
+      - SlowReversible      # 1–100 years (e.g., enhanced weathering)
+      - Irreversible        # > 100 years (e.g., ocean alkalinity)
+
+  SideEffect:
+    description: "An unintended consequence of an intervention"
+    properties:
+      name: { type: string, required: true }
+      affected_family: { type: ProcessFamily }
+      severity: { type: string, enum: [low, moderate, high, unknown] }
+      description: { type: string }
+
+# ----- Intervention Instances -----
+
+interventions:
+  StratosphericAerosolInjection:
+    category: SolarRadiationManagement
+    description: "Injection of reflective aerosols (SO2, CaCO3) into the stratosphere"
+    deployment_scale: Hemispheric
+    reversibility: FastReversible
+    technology_readiness_level: 4
+    affected_processes:
+      - family: Radiation
+        mechanism: "Reduces incoming SW radiation by ~1-4 W/m²"
+        variables_modified: [SWdown, diffuse_fraction]
+      - family: Atmosphere
+        mechanism: "Alters stratospheric heating, may shift ITCZ"
+        variables_modified: [stratospheric_temperature, precipitation_pattern]
+      - family: Ecology
+        mechanism: "Increased diffuse light fraction may enhance photosynthesis"
+        variables_modified: [diffuse_PAR, GPP_response]
+      - family: Cryosphere
+        mechanism: "Reduced surface radiation slows ice melt"
+        variables_modified: [surface_energy_balance]
+    side_effects:
+      - { name: "Ozone depletion", affected_family: Atmosphere, severity: moderate }
+      - { name: "Acid deposition", affected_family: Biogeochemistry, severity: moderate }
+      - { name: "Termination shock", severity: high, description: "Rapid warming if injection stops" }
+
+  MarineCloudBrightening:
+    category: SolarRadiationManagement
+    description: "Sea-salt aerosol spray to increase cloud albedo over oceans"
+    deployment_scale: Regional
+    reversibility: FastReversible
+    technology_readiness_level: 3
+    affected_processes:
+      - family: Radiation
+        mechanism: "Increases marine stratus cloud albedo"
+        variables_modified: [cloud_albedo, SWdown_surface]
+      - family: Ocean
+        mechanism: "Reduced SST under brightened clouds"
+        variables_modified: [SST, mixed_layer_heat_content]
+    side_effects:
+      - { name: "Precipitation suppression", affected_family: Hydrology, severity: moderate }
+
+  SurfaceAlbedoModification:
+    category: AlbedoModification
+    description: "Increasing surface reflectivity (crop brightening, cool roofs, desert mirrors)"
+    deployment_scale: Regional
+    reversibility: SlowReversible
+    technology_readiness_level: 5
+    affected_processes:
+      - family: Radiation
+        mechanism: "Increases surface albedo by 0.05-0.30"
+        variables_modified: [surface_albedo, net_radiation]
+      - family: Ecology
+        mechanism: "Altered crop varieties or land cover"
+        variables_modified: [LAI, crop_yield]
+      - family: Hydrology
+        mechanism: "Changed energy balance affects ET"
+        variables_modified: [ET, soil_temperature]
+
+  DirectAirCapture:
+    category: CarbonDioxideRemoval
+    description: "Chemical capture of CO2 directly from ambient air"
+    deployment_scale: Local
+    reversibility: Irreversible
+    technology_readiness_level: 6
+    affected_processes:
+      - family: Atmosphere
+        mechanism: "Reduces atmospheric CO2 concentration"
+        variables_modified: [CO2_concentration]
+      - family: Biogeochemistry
+        mechanism: "Alters the carbon budget"
+        variables_modified: [atmospheric_carbon_pool]
+    side_effects:
+      - { name: "Energy demand", severity: high, description: "Requires 5-10 GJ/tCO2" }
+      - { name: "Water consumption", affected_family: Hydrology, severity: moderate }
+
+  OceanAlkalinityEnhancement:
+    category: OceanIntervention
+    description: "Adding alkaline minerals (olivine, lime) to the ocean to increase CO2 uptake"
+    deployment_scale: Regional
+    reversibility: Irreversible
+    technology_readiness_level: 3
+    affected_processes:
+      - family: Ocean
+        mechanism: "Shifts carbonate chemistry equilibrium, increases CO2 absorption"
+        variables_modified: [DIC, alkalinity, pCO2_ocean, pH]
+      - family: Biogeochemistry
+        mechanism: "Changes nutrient availability (Si, Fe)"
+        variables_modified: [nutrient_concentration, primary_productivity]
+    side_effects:
+      - { name: "Ecosystem disruption", affected_family: TrophicDynamics, severity: unknown }
+      - { name: "Particle plume sedimentation", affected_family: Ocean, severity: moderate }
+
+  EnhancedWeathering:
+    category: CarbonDioxideRemoval
+    description: "Spreading crushed silicate minerals on agricultural soils"
+    deployment_scale: Regional
+    reversibility: Irreversible
+    technology_readiness_level: 4
+    affected_processes:
+      - family: Biogeochemistry
+        mechanism: "Mineral dissolution sequesters CO2 as bicarbonate"
+        variables_modified: [soil_carbon, soil_pH, cation_exchange]
+      - family: Hydrology
+        mechanism: "Changed soil chemistry affects runoff alkalinity"
+        variables_modified: [runoff_pH, dissolved_minerals]
+      - family: Ecology
+        mechanism: "Nutrient release (Ca, Mg, K, Si) may boost crop yield"
+        variables_modified: [nutrient_availability, crop_yield]
+
+  Afforestation:
+    category: CarbonDioxideRemoval
+    description: "Large-scale tree planting for carbon sequestration"
+    deployment_scale: Continental
+    reversibility: SlowReversible
+    technology_readiness_level: 8
+    affected_processes:
+      - family: Ecology
+        mechanism: "Increased biomass carbon pool"
+        variables_modified: [biomass, LAI, GPP]
+      - family: Hydrology
+        mechanism: "Increased ET, decreased runoff"
+        variables_modified: [ET, runoff, soil_moisture]
+      - family: Radiation
+        mechanism: "Darker canopy reduces surface albedo"
+        variables_modified: [surface_albedo]
+    side_effects:
+      - { name: "Albedo warming at high latitudes", affected_family: Radiation, severity: moderate }
+      - { name: "Biodiversity impact", affected_family: Ecology, severity: moderate }
+
+  OceanIronFertilization:
+    category: OceanIntervention
+    description: "Adding iron to HNLC ocean regions to stimulate phytoplankton blooms"
+    deployment_scale: Regional
+    reversibility: FastReversible
+    technology_readiness_level: 3
+    affected_processes:
+      - family: Ocean
+        mechanism: "Enhanced biological carbon pump"
+        variables_modified: [primary_productivity, export_production, DIC]
+      - family: TrophicDynamics
+        mechanism: "Altered marine food web structure"
+        variables_modified: [phytoplankton_biomass, zooplankton_biomass]
+    side_effects:
+      - { name: "Hypoxia at depth", affected_family: Ocean, severity: high }
+      - { name: "Toxic algal blooms", affected_family: TrophicDynamics, severity: moderate }
+      - { name: "N2O emissions", affected_family: Atmosphere, severity: moderate }
+
+# ----- State Variables Specific to Geoengineering -----
+
+state_variables:
+  - name: aerosol_optical_depth_strat
+    unit: dimensionless
+    category: Forcing
+    description: "Stratospheric aerosol optical depth from SRM injection"
+
+  - name: injected_SO2_mass
+    unit: "Tg/yr"
+    category: Forcing
+    description: "Annual SO2 injection rate for SAI"
+
+  - name: surface_albedo_enhancement
+    unit: dimensionless
+    category: Forcing
+    description: "Added albedo from surface modification"
+
+  - name: CDR_removal_rate
+    unit: "GtC/yr"
+    category: Forcing
+    description: "Annual CO2 removal rate from all CDR techniques"
+
+  - name: termination_risk_index
+    unit: dimensionless
+    category: DisturbanceState
+    description: "Estimated warming rebound if SRM terminates (0 = safe, 1 = severe)"
+
+# ----- Coupling Relations -----
+
+geoengineering_coupling:
+  - from: StratosphericAerosolInjection
+    to: Radiation
+    variables: [SWdown, diffuse_fraction, aerosol_optical_depth_strat]
+    coupling_type: one_way
+
+  - from: StratosphericAerosolInjection
+    to: Atmosphere
+    variables: [stratospheric_temperature, ozone_column]
+    coupling_type: one_way
+
+  - from: MarineCloudBrightening
+    to: Radiation
+    variables: [cloud_albedo]
+    coupling_type: one_way
+
+  - from: DirectAirCapture
+    to: Atmosphere
+    variables: [CO2_concentration]
+    coupling_type: one_way
+
+  - from: OceanAlkalinityEnhancement
+    to: Ocean
+    variables: [alkalinity, pH, pCO2_ocean]
+    coupling_type: one_way
+
+  - from: EnhancedWeathering
+    to: Biogeochemistry
+    variables: [soil_pH, cation_exchange, soil_carbon]
+    coupling_type: one_way
+
+  - from: Afforestation
+    to: Ecology
+    variables: [biomass, LAI]
+    coupling_type: two_way
+
+  - from: OceanIronFertilization
+    to: Ocean
+    variables: [primary_productivity, DIC]
+    coupling_type: one_way

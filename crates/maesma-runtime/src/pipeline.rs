@@ -185,12 +185,16 @@ fn init_default_fields(state: &mut SimulationState) {
     state.init_field_const("latent_heat", -80.0);
     state.init_field_const("wind_stress", 0.1);
 
+    // Ocean (SlabOcean R0 inputs)
+    state.init_field_const("net_heat_flux", 50.0);
+
     // Cryosphere (snowpack inputs/outputs)
     state.init_field_const("sw_down", 200.0);
     state.init_field_const("lw_down", 300.0);
     state.init_field_const("swe", 50.0);
     state.init_field_const("snow_albedo", 0.8);
     state.init_field("snowmelt");
+    state.init_field_const("snow_water_equivalent", 50.0);
 
     // Biogeochemistry (CENTURY inputs/outputs)
     state.init_field_const("litter_input", 0.01);
@@ -200,6 +204,8 @@ fn init_default_fields(state: &mut SimulationState) {
     state.init_field_const("soil_carbon_slow", 10.0);
     state.init_field_const("soil_carbon_passive", 20.0);
     state.init_field("soil_respiration");
+    state.init_field_const("soil_carbon", 5.0);
+    state.init_field_const("albedo_soil", 0.2);
 
     // Ecology (LPJ-style inputs/outputs)
     state.init_field_const("light", 200.0);

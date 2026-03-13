@@ -318,12 +318,157 @@ impl ProcessRunner for SnowpackModel {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// R0: Degree-Day Melt Model
+// ───────────────────────────────────────────────────────────────────
+
+/// Temperature-index (degree-day factor) snowmelt model (R0).
+///
+/// The simplest snowmelt model:
+///   Melt = DDF · max(T − T_melt, 0)
+///
+/// where DDF is the degree-day factor [mm °C⁻¹ d⁻¹] and T_melt is the
+/// threshold temperature (typically 0 °C).
+///
+/// **Inputs**: `snow_water_equivalent`, `temperature`, `precipitation`
+/// **Outputs**: `snow_water_equivalent` (updated), `snowmelt`, `snow_fraction`
+pub struct DegreeDayMelt {
+    /// Degree-day factor [kg m⁻² °C⁻¹ d⁻¹]
+    pub ddf: f64,
+    /// Melt threshold temperature [°C]
+    pub t_melt: f64,
+    /// Rain/snow partition temperature [°C]
+    pub t_rain_snow: f64,
+}
+
+impl Default for DegreeDayMelt {
+    fn default() -> Self {
+        Self {
+            ddf: 4.0, // typical 2–6 mm/°C/day
+            t_melt: 0.0,
+            t_rain_snow: 1.5,
+        }
+    }
+}
+
+impl ProcessRunner for DegreeDayMelt {
+    fn family(&self) -> ProcessFamily {
+        ProcessFamily::Cryosphere
+    }
+
+    fn rung(&self) -> FidelityRung {
+        FidelityRung::R0
+    }
+
+    fn inputs(&self) -> Vec<String> {
+        vec![
+            "snow_water_equivalent".into(),
+            "temperature".into(),
+            "precipitation".into(),
+        ]
+    }
+
+    fn outputs(&self) -> Vec<String> {
+        vec![
+            "snow_water_equivalent".into(),
+            "snowmelt".into(),
+            "snow_fraction".into(),
+        ]
+    }
+
+    fn conserved_quantities(&self) -> Vec<String> {
+        vec!["water_mass".into()]
+    }
+
+    fn step(&mut self, state: &mut dyn ProcessState, dt: f64) -> maesma_core::Result<()> {
+        let swe = state
+            .get_field("snow_water_equivalent")
+            .ok_or_else(|| {
+                maesma_core::Error::Runtime("missing field: snow_water_equivalent".into())
+            })?
+            .clone();
+        let temp = state
+            .get_field("temperature")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: temperature".into()))?
+            .clone();
+        let precip = state
+            .get_field("precipitation")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: precipitation".into()))?
+            .clone();
+
+        let n = swe.len();
+        let swe_sl = swe.as_slice().unwrap_or(&[]);
+        let t_sl = temp.as_slice().unwrap_or(&[]);
+        let p_sl = precip.as_slice().unwrap_or(&[]);
+        let len = n.min(swe_sl.len()).min(t_sl.len()).min(p_sl.len());
+
+        let dt_days = dt / 86400.0;
+
+        let mut swe_out = vec![0.0f64; len];
+        let mut melt_out = vec![0.0f64; len];
+        let mut frac_out = vec![0.0f64; len];
+
+        for i in 0..len {
+            let mut s = swe_sl[i].max(0.0);
+            let t = t_sl[i];
+            let p = p_sl[i].max(0.0);
+
+            // Precipitation partition
+            let snowfall = if t < self.t_rain_snow { p * dt } else { 0.0 };
+            s += snowfall;
+
+            // Degree-day melt
+            let melt_potential = self.ddf * (t - self.t_melt).max(0.0) * dt_days;
+            let melt = melt_potential.min(s);
+            s = (s - melt).max(0.0);
+
+            swe_out[i] = s;
+            melt_out[i] = melt / dt; // flux [kg m⁻² s⁻¹]
+            frac_out[i] = if s > 1.0 { 1.0 } else { s }; // simple snow-cover fraction
+        }
+
+        macro_rules! write_field {
+            ($name:expr, $vals:expr) => {
+                if let Some(f) = state.get_field_mut($name) {
+                    if let Some(sl) = f.as_slice_mut() {
+                        for (o, v) in sl.iter_mut().zip($vals.iter()) {
+                            *o = *v;
+                        }
+                    }
+                }
+            };
+        }
+        write_field!("snow_water_equivalent", swe_out);
+        write_field!("snowmelt", melt_out);
+        write_field!("snow_fraction", frac_out);
+
+        Ok(())
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
 // Tests
 // ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_degree_day_no_melt_cold() {
+        let m = DegreeDayMelt::default();
+        let melt_potential = m.ddf * (-5.0_f64 - m.t_melt).max(0.0);
+        assert_eq!(melt_potential, 0.0, "No melt below T_melt");
+    }
+
+    #[test]
+    fn test_degree_day_melt_warm() {
+        let m = DegreeDayMelt::default();
+        let melt_potential = m.ddf * (5.0 - m.t_melt).max(0.0) * 1.0; // 1 day
+        assert!(
+            (melt_potential - 20.0).abs() < 1e-10,
+            "DDF=4 × 5°C = 20 mm/day"
+        );
+    }
 
     #[test]
     fn test_albedo_decays() {

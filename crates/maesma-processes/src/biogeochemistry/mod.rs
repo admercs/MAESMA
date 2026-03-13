@@ -279,6 +279,132 @@ impl ProcessRunner for CenturySoilCarbon {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// R0: Single-Pool Soil Carbon (Q10)
+// ───────────────────────────────────────────────────────────────────
+
+/// Single-pool first-order soil carbon model (R0).
+///
+/// The simplest soil C model: one pool with temperature-dependent decay.
+///   dC/dt = litter_input − k · C · f_T(T) · f_W(W)
+///
+/// **Inputs**: `soil_carbon`, `litter_input`, `temperature`, `moisture`
+/// **Outputs**: `soil_carbon` (updated), `soil_respiration`
+pub struct SinglePoolCarbon {
+    /// Base turnover rate [yr⁻¹]
+    pub k_base: f64,
+    /// Q10 temperature coefficient
+    pub q10: f64,
+    /// Reference temperature [°C]
+    pub t_ref: f64,
+}
+
+impl Default for SinglePoolCarbon {
+    fn default() -> Self {
+        Self {
+            k_base: 0.02, // ~50 yr mean residence time
+            q10: 2.0,
+            t_ref: 25.0,
+        }
+    }
+}
+
+impl ProcessRunner for SinglePoolCarbon {
+    fn family(&self) -> ProcessFamily {
+        ProcessFamily::Biogeochemistry
+    }
+
+    fn rung(&self) -> FidelityRung {
+        FidelityRung::R0
+    }
+
+    fn inputs(&self) -> Vec<String> {
+        vec![
+            "soil_carbon".into(),
+            "litter_input".into(),
+            "temperature".into(),
+            "moisture".into(),
+        ]
+    }
+
+    fn outputs(&self) -> Vec<String> {
+        vec!["soil_carbon".into(), "soil_respiration".into()]
+    }
+
+    fn conserved_quantities(&self) -> Vec<String> {
+        vec!["carbon".into()]
+    }
+
+    fn step(&mut self, state: &mut dyn ProcessState, dt: f64) -> maesma_core::Result<()> {
+        let carbon = state
+            .get_field("soil_carbon")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: soil_carbon".into()))?
+            .clone();
+        let litter = state
+            .get_field("litter_input")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: litter_input".into()))?
+            .clone();
+        let temp = state
+            .get_field("temperature")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: temperature".into()))?
+            .clone();
+        let moist = state
+            .get_field("moisture")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: moisture".into()))?
+            .clone();
+
+        let n = carbon.len();
+        let c_sl = carbon.as_slice().unwrap_or(&[]);
+        let l_sl = litter.as_slice().unwrap_or(&[]);
+        let t_sl = temp.as_slice().unwrap_or(&[]);
+        let m_sl = moist.as_slice().unwrap_or(&[]);
+        let len = n
+            .min(c_sl.len())
+            .min(l_sl.len())
+            .min(t_sl.len())
+            .min(m_sl.len());
+
+        let secs_per_yr = 365.25 * 86400.0;
+        let k_s = self.k_base / secs_per_yr; // convert to per-second
+
+        let mut c_out = vec![0.0f64; len];
+        let mut resp_out = vec![0.0f64; len];
+
+        for i in 0..len {
+            let c = c_sl[i].max(0.0);
+            let lit = l_sl[i].max(0.0);
+            let t = t_sl[i];
+            let w = m_sl[i].clamp(0.0, 1.0);
+
+            let f_t = self.q10.powf((t - self.t_ref) / 10.0).max(0.0);
+            // Simple linear moisture response peaking at w=0.6
+            let w_opt = 0.6;
+            let f_w = (1.0 - ((w - w_opt) / w_opt).powi(2)).max(0.05);
+
+            let decomp = k_s * c * f_t * f_w;
+            let dc = (lit - decomp) * dt;
+            c_out[i] = (c + dc).max(0.0);
+            resp_out[i] = decomp;
+        }
+
+        macro_rules! write_field {
+            ($name:expr, $vals:expr) => {
+                if let Some(f) = state.get_field_mut($name) {
+                    if let Some(sl) = f.as_slice_mut() {
+                        for (o, v) in sl.iter_mut().zip($vals.iter()) {
+                            *o = *v;
+                        }
+                    }
+                }
+            };
+        }
+        write_field!("soil_carbon", c_out);
+        write_field!("soil_respiration", resp_out);
+
+        Ok(())
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
 // Tests
 // ───────────────────────────────────────────────────────────────────
 

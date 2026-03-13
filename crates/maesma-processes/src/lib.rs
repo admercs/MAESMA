@@ -39,38 +39,63 @@ pub fn create_runner(family: ProcessFamily, rung: FidelityRung) -> Option<Box<dy
             Some(Box::new(hydrology::RichardsInfiltration::default()))
         }
         // Radiation
+        (ProcessFamily::Radiation, FidelityRung::R0) => {
+            Some(Box::new(radiation::BeerLambertRadiation::default()))
+        }
         (ProcessFamily::Radiation, FidelityRung::R1) => {
             Some(Box::new(radiation::TwoStreamRadiation::default()))
         }
         // Atmosphere
+        (ProcessFamily::Atmosphere, FidelityRung::R0) => {
+            Some(Box::new(atmosphere::BulkTransferAtmosphere::default()))
+        }
         (ProcessFamily::Atmosphere, FidelityRung::R1) => {
             Some(Box::new(atmosphere::MoninObukhovSurfaceLayer::default()))
         }
         // Ocean
+        (ProcessFamily::Ocean, FidelityRung::R0) => Some(Box::new(ocean::SlabOcean::default())),
         (ProcessFamily::Ocean, FidelityRung::R1) => {
             Some(Box::new(ocean::MixedLayerOcean::default()))
         }
         // Cryosphere
+        (ProcessFamily::Cryosphere, FidelityRung::R0) => {
+            Some(Box::new(cryosphere::DegreeDayMelt::default()))
+        }
         (ProcessFamily::Cryosphere, FidelityRung::R1) => {
             Some(Box::new(cryosphere::SnowpackModel::default()))
         }
         // Biogeochemistry
+        (ProcessFamily::Biogeochemistry, FidelityRung::R0) => {
+            Some(Box::new(biogeochemistry::SinglePoolCarbon::default()))
+        }
         (ProcessFamily::Biogeochemistry, FidelityRung::R1) => {
             Some(Box::new(biogeochemistry::CenturySoilCarbon::default()))
         }
         // Ecology
+        (ProcessFamily::Ecology, FidelityRung::R0) => {
+            Some(Box::new(ecology::StaticVegetation::default()))
+        }
         (ProcessFamily::Ecology, FidelityRung::R1) => {
             Some(Box::new(ecology::CohortVegetation::default()))
         }
         // Trophic Dynamics
+        (ProcessFamily::TrophicDynamics, FidelityRung::R0) => {
+            Some(Box::new(trophic_dynamics::StaticFoodWeb::default()))
+        }
         (ProcessFamily::TrophicDynamics, FidelityRung::R1) => {
             Some(Box::new(trophic_dynamics::LotkaVolterraTrophic::default()))
         }
         // Evolution
+        (ProcessFamily::Evolution, FidelityRung::R0) => {
+            Some(Box::new(evolution::FixedTraits::default()))
+        }
         (ProcessFamily::Evolution, FidelityRung::R1) => {
             Some(Box::new(evolution::QuantitativeGeneticsEvolution::default()))
         }
         // Human Systems
+        (ProcessFamily::HumanSystems, FidelityRung::R0) => {
+            Some(Box::new(human_systems::PrescribedLandUse::default()))
+        }
         (ProcessFamily::HumanSystems, FidelityRung::R1) => {
             Some(Box::new(human_systems::LandUseChange::default()))
         }
@@ -83,15 +108,15 @@ pub fn create_default_runners() -> Vec<(ProcessFamily, FidelityRung, Box<dyn Pro
     let configs: &[(ProcessFamily, FidelityRung)] = &[
         (ProcessFamily::Fire, FidelityRung::R0),
         (ProcessFamily::Hydrology, FidelityRung::R0),
-        (ProcessFamily::Radiation, FidelityRung::R1),
-        (ProcessFamily::Atmosphere, FidelityRung::R1),
-        (ProcessFamily::Ocean, FidelityRung::R1),
-        (ProcessFamily::Cryosphere, FidelityRung::R1),
-        (ProcessFamily::Biogeochemistry, FidelityRung::R1),
-        (ProcessFamily::Ecology, FidelityRung::R1),
-        (ProcessFamily::TrophicDynamics, FidelityRung::R1),
-        (ProcessFamily::Evolution, FidelityRung::R1),
-        (ProcessFamily::HumanSystems, FidelityRung::R1),
+        (ProcessFamily::Radiation, FidelityRung::R0),
+        (ProcessFamily::Atmosphere, FidelityRung::R0),
+        (ProcessFamily::Ocean, FidelityRung::R0),
+        (ProcessFamily::Cryosphere, FidelityRung::R0),
+        (ProcessFamily::Biogeochemistry, FidelityRung::R0),
+        (ProcessFamily::Ecology, FidelityRung::R0),
+        (ProcessFamily::TrophicDynamics, FidelityRung::R0),
+        (ProcessFamily::Evolution, FidelityRung::R0),
+        (ProcessFamily::HumanSystems, FidelityRung::R0),
     ];
 
     configs

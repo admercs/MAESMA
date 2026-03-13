@@ -171,6 +171,83 @@ impl ProcessRunner for LotkaVolterraTrophic {
 }
 
 // ───────────────────────────────────────────────────────────────────
+// R0: Static Food Web
+// ───────────────────────────────────────────────────────────────────
+
+/// Static food-web model with fixed trophic efficiencies (R0).
+///
+/// Populations are held at carrying capacity (no dynamics); only
+/// trophic fluxes are diagnosed.
+///
+/// **Inputs**: `prey_biomass`, `predator_biomass`, `carrying_capacity`
+/// **Outputs**: `prey_biomass`, `predator_biomass`, `prey_growth_rate`, `predator_growth_rate`
+pub struct StaticFoodWeb;
+
+impl Default for StaticFoodWeb {
+    fn default() -> Self {
+        Self
+    }
+}
+
+impl ProcessRunner for StaticFoodWeb {
+    fn family(&self) -> ProcessFamily {
+        ProcessFamily::TrophicDynamics
+    }
+
+    fn rung(&self) -> FidelityRung {
+        FidelityRung::R0
+    }
+
+    fn inputs(&self) -> Vec<String> {
+        vec![
+            "prey_biomass".into(),
+            "predator_biomass".into(),
+            "carrying_capacity".into(),
+        ]
+    }
+
+    fn outputs(&self) -> Vec<String> {
+        vec![
+            "prey_biomass".into(),
+            "predator_biomass".into(),
+            "prey_growth_rate".into(),
+            "predator_growth_rate".into(),
+        ]
+    }
+
+    fn conserved_quantities(&self) -> Vec<String> {
+        vec!["biomass".into()]
+    }
+
+    fn step(&mut self, state: &mut dyn ProcessState, _dt: f64) -> maesma_core::Result<()> {
+        // R0: no dynamics, just pass through current populations
+        // Diagnose zero growth rates
+        let prey = state
+            .get_field("prey_biomass")
+            .ok_or_else(|| maesma_core::Error::Runtime("missing field: prey_biomass".into()))?
+            .clone();
+        let len = prey.len();
+        let zeros = vec![0.0f64; len];
+
+        macro_rules! write_field {
+            ($name:expr, $vals:expr) => {
+                if let Some(f) = state.get_field_mut($name) {
+                    if let Some(sl) = f.as_slice_mut() {
+                        for (o, v) in sl.iter_mut().zip($vals.iter()) {
+                            *o = *v;
+                        }
+                    }
+                }
+            };
+        }
+        write_field!("prey_growth_rate", zeros);
+        write_field!("predator_growth_rate", zeros);
+
+        Ok(())
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────
 // Tests
 // ───────────────────────────────────────────────────────────────────
 
