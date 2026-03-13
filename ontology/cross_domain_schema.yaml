@@ -1,0 +1,122 @@
+# Cross-Domain Relations Ontology Schema
+# Defines relations that bridge the Process, Dataset, and Metric domains.
+
+relations:
+  # Process → Dataset relations
+  requires_forcing:
+    domain: Representation
+    range: Observable
+    description: "The representation requires this observable as external forcing input"
+    cardinality: many-to-many
+
+  calibrates_against:
+    domain: Representation
+    range: Product
+    description: "The representation is calibrated using this data product"
+    cardinality: many-to-many
+
+  validated_by:
+    domain: Representation
+    range: Product
+    description: "The representation's skill is evaluated against this product"
+    cardinality: many-to-many
+
+  measured_by:
+    domain: Observable
+    range: Product
+    description: "This observable can be measured by this product"
+    cardinality: one-to-many
+
+  # Dataset → Metric relations
+  validates:
+    domain: Product
+    range: ScoringProtocol
+    description: "This product provides validation data for a scoring protocol"
+    cardinality: many-to-many
+
+  # Process → Metric relations
+  penalizes:
+    domain: Constraint
+    range: FitnessFunction
+    description: "Violation of this constraint penalizes the fitness score"
+    cardinality: many-to-many
+
+  # Discovery relations
+  discovered_via:
+    domain: Representation
+    range: Representation
+    description: "This representation was discovered by analyzing residuals of another"
+    cardinality: many-to-one
+
+  discovery_query:
+    domain: Product
+    range: Observable
+    description: "Candidate data product found by automated discovery for this observable"
+    cardinality: many-to-many
+    properties:
+      relevance_score: { type: float, range: "[0, 1]" }
+      novelty_score: { type: float, range: "[0, 1]" }
+      status: { type: string, enum: [candidate, validated, rejected] }
+
+  # Cross-family coupling relations
+  drives:
+    domain: ProcessFamily
+    range: ProcessFamily
+    description: "One process family provides forcing or boundary conditions to another"
+    instances:
+      - { from: Atmosphere, to: Radiation, variables: [SWdown, LWdown, cloud_fraction] }
+      - { from: Atmosphere, to: Hydrology, variables: [precipitation, air_temperature, wind_speed] }
+      - { from: Atmosphere, to: Fire, variables: [wind_speed, relative_humidity, air_temperature] }
+      - { from: Radiation, to: Ecology, variables: [PAR, net_radiation] }
+      - { from: Radiation, to: Hydrology, variables: [potential_ET, net_radiation] }
+      - { from: Hydrology, to: Ecology, variables: [soil_moisture, water_table_depth] }
+      - { from: Hydrology, to: Biogeochemistry, variables: [soil_moisture, soil_temperature] }
+      - { from: Ecology, to: Fire, variables: [fuel_load, canopy_bulk_density, canopy_height] }
+      - { from: Ecology, to: Biogeochemistry, variables: [litter_fall, root_exudates, LAI] }
+      - { from: Fire, to: Ecology, variables: [burn_severity, mortality_fraction] }
+      - { from: Fire, to: Hydrology, variables: [soil_hydrophobicity, char_fraction] }
+      - { from: Fire, to: Biogeochemistry, variables: [combustion_emissions, ash_nutrient_pulse] }
+      - { from: Cryosphere, to: Hydrology, variables: [snowmelt, SWE] }
+      - { from: Cryosphere, to: Ocean, variables: [freshwater_flux, sea_ice_extent] }
+      - { from: Ocean, to: Atmosphere, variables: [SST, latent_heat_flux, sensible_heat_flux] }
+      - { from: Biogeochemistry, to: Atmosphere, variables: [CO2_flux, CH4_flux, N2O_flux] }
+      - { from: TrophicDynamics, to: Ecology, variables: [herbivory_pressure, seed_dispersal] }
+      - { from: TrophicDynamics, to: Biogeochemistry, variables: [nutrient_recycling] }
+      - { from: Evolution, to: Ecology, variables: [trait_distributions, speciation_rate] }
+      - { from: Evolution, to: TrophicDynamics, variables: [diet_breadth, body_size] }
+      - { from: HumanSystems, to: Hydrology, variables: [water_extraction, impervious_fraction] }
+      - { from: HumanSystems, to: Ecology, variables: [land_use_change, harvest_fraction] }
+      - { from: HumanSystems, to: Atmosphere, variables: [anthropogenic_emissions, aerosol_loading] }
+
+  # Disturbance cascade
+  triggers_disturbance:
+    domain: Event
+    range: ProcessFamily
+    description: "An event triggers activation or upgrade of a process family"
+    instances:
+      - { event: LightningIgnition, target: Fire, action: "spawn F1 solver" }
+      - { event: AnthropogenicIgnition, target: Fire, action: "spawn F1 solver" }
+      - { event: ThresholdExceedance, target: Hydrology, action: "upgrade H0→H1" }
+      - { event: RegimeShift, target: Radiation, action: "upgrade R0→R1" }
+      - { event: RegimeShift, target: Ecology, action: "re-evaluate succession" }
+
+  # Geoengineering → process interactions
+  actuates_via:
+    domain: Intervention
+    range: ProcessFamily
+    description: "A geoengineering intervention acts through a process family"
+    examples:
+      - { intervention: SAI, target: Radiation, mechanism: "aerosol scattering reduces SWdown" }
+      - { intervention: MCB, target: Atmosphere, mechanism: "sea-salt aerosol brightens clouds" }
+      - { intervention: OAE, target: Ocean, mechanism: "alkalinity addition sequesters CO2" }
+      - { intervention: DAC, target: Atmosphere, mechanism: "direct CO2 removal from air" }
+
+  # Planetary defense → process cascades
+  triggers_cascade:
+    domain: ImpactScenario
+    range: ProcessFamily
+    description: "An impact scenario triggers cascading effects through process families"
+    examples:
+      - { scenario: "10km asteroid", cascade: [Atmosphere, Fire, Ecology, TrophicDynamics, Evolution] }
+      - { scenario: "1km asteroid", cascade: [Atmosphere, Fire, Ecology] }
+      - { scenario: "ocean impact", cascade: [Ocean, Atmosphere, Cryosphere] }

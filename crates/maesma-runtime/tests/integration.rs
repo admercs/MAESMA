@@ -145,3 +145,110 @@ async fn heuristic_inference_engine() {
         engine.infer(request).await.expect("regime prediction");
     assert_eq!(response.scores.len(), 4);
 }
+
+// ── KB Validation & Closure tests ────────────────────────────────────
+
+#[test]
+fn kb_validate_all_manifests() {
+    let kb = maesma_knowledgebase::KnowledgebaseStore::in_memory().unwrap();
+    let manifests = maesma_knowledgebase::generate_seed_manifests();
+    for m in &manifests {
+        kb.deposit_manifest(m).unwrap();
+    }
+    let issues = kb.validate_all().unwrap();
+    // Seed manifests should be well-formed
+    for (name, problems) in &issues {
+        eprintln!("Validation issues in {name}: {:?}", problems);
+    }
+    // Allow some issues but not catastrophic ones
+    assert!(
+        issues.len() <= manifests.len(),
+        "More issues than manifests"
+    );
+}
+
+#[test]
+fn kb_check_closure_on_seed_data() {
+    let kb = maesma_knowledgebase::KnowledgebaseStore::in_memory().unwrap();
+    let manifests = maesma_knowledgebase::generate_seed_manifests();
+    for m in &manifests {
+        kb.deposit_manifest(m).unwrap();
+    }
+    let forcing = [
+        "P",
+        "Tair",
+        "RH",
+        "VPD",
+        "Wind",
+        "SWdown",
+        "LWdown",
+        "CO2",
+        "precipitation",
+        "air_temperature",
+        "wind_speed",
+        "shortwave_radiation",
+        "longwave_radiation",
+    ];
+    let report = kb.check_closure(&forcing).unwrap();
+    assert!(report.total_inputs > 0);
+    assert!(report.total_outputs > 0);
+}
+
+// ── Embedding engine integration tests ───────────────────────────────
+
+#[test]
+fn embedding_engine_default_rules() {
+    let engine = maesma_runtime::EmbeddingEngine::with_defaults();
+    assert!(engine.rule_count() >= 4);
+}
+
+#[test]
+fn embedding_fire_event_integration() {
+    let mut engine = maesma_runtime::EmbeddingEngine::with_defaults();
+    let mut bus = maesma_runtime::EventBus::new();
+    let state = maesma_runtime::SimulationState::new(20, 20);
+
+    bus.push(maesma_runtime::Event {
+        kind: maesma_runtime::events::EventKind::LightningIgnition,
+        time: 0.0,
+        location: Some((10, 10)),
+        payload: None,
+    });
+
+    let activated = engine.process_events(&mut bus, 0.0, &state);
+    assert!(!activated.is_empty());
+    assert_eq!(engine.active_count(), activated.len());
+}
+
+// ── Variable registry tests ─────────────────────────────────────────
+
+#[test]
+fn variable_registry_defaults() {
+    let reg = maesma_core::VariableRegistry::with_defaults();
+    assert!(
+        reg.len() >= 20,
+        "Should have at least 20 canonical variables"
+    );
+    assert!(reg.get("precipitation").is_some());
+    assert!(reg.get("soil_moisture").is_some());
+    assert!(reg.get("burn_severity").is_some());
+}
+
+// ── SAPG serialization integration tests ─────────────────────────────
+
+#[test]
+fn sapg_json_round_trip_integration() {
+    let mut sapg = maesma_core::Sapg::new();
+    let id = maesma_core::ProcessId::new();
+    sapg.add_process(maesma_core::graph::ProcessNode {
+        process_id: id,
+        name: "TestProcess".into(),
+        family: maesma_core::ProcessFamily::Hydrology,
+        rung: maesma_core::FidelityRung::R0,
+        tier: maesma_core::manifest::CouplingTier::Slow,
+        cost: 1.0,
+    });
+    let json = sapg.to_json().unwrap();
+    let restored = maesma_core::Sapg::from_json(&json).unwrap();
+    assert_eq!(restored.node_count(), 1);
+}

@@ -1,0 +1,104 @@
+# Metric Domain Ontology Schema
+# Defines classes for skill metrics, scoring protocols, and fitness functions.
+
+classes:
+  Metric:
+    description: "A named skill or error metric"
+    properties:
+      name: { type: string, required: true }
+      abbreviation: { type: string, required: true }
+      description: { type: string }
+      range: { type: string }
+      optimum: { type: string }
+      higher_is_better: { type: bool, required: true }
+    instances:
+      - { name: "Root Mean Square Error", abbreviation: RMSE, range: "[0, ∞)", optimum: "0", higher_is_better: false }
+      - { name: "Mean Absolute Error", abbreviation: MAE, range: "[0, ∞)", optimum: "0", higher_is_better: false }
+      - { name: "Bias", abbreviation: BIAS, range: "(-∞, ∞)", optimum: "0", higher_is_better: false }
+      - { name: "Pearson Correlation", abbreviation: R, range: "[-1, 1]", optimum: "1", higher_is_better: true }
+      - { name: "Spearman Correlation", abbreviation: RHO, range: "[-1, 1]", optimum: "1", higher_is_better: true }
+      - { name: "Kling-Gupta Efficiency", abbreviation: KGE, range: "(-∞, 1]", optimum: "1", higher_is_better: true }
+      - { name: "Nash-Sutcliffe Efficiency", abbreviation: NSE, range: "(-∞, 1]", optimum: "1", higher_is_better: true }
+      - { name: "Continuous Ranked Probability Score", abbreviation: CRPS, range: "[0, ∞)", optimum: "0", higher_is_better: false }
+      - { name: "Conservation Residual", abbreviation: CONS, range: "[0, ∞)", optimum: "0", higher_is_better: false }
+      - { name: "Timing Error", abbreviation: TE, range: "[0, ∞)", optimum: "0", higher_is_better: false }
+
+  ScoringProtocol:
+    description: "A standardized procedure for evaluating a model against observations"
+    properties:
+      name: { type: string, required: true }
+      observable: { type: Observable, required: true }
+      metrics: { type: "list[Metric]", required: true }
+      spatial_aggregation: { type: string, enum: [point, basin, grid_cell, region, global] }
+      temporal_aggregation: { type: string, enum: [timestep, daily, monthly, annual, climatology] }
+      evaluation_period: { type: string }
+      calibration_period: { type: string }
+      cross_validation: { type: string, enum: [none, temporal_split, spatial_split, leave_one_out] }
+
+  FitnessFunction:
+    description: "Multi-objective function combining metrics, cost, and constraints"
+    properties:
+      name: { type: string, required: true }
+      components:
+        type: "list[FitnessComponent]"
+        required: true
+      aggregation: { type: string, required: true, enum: [weighted_sum, pareto, lexicographic] }
+
+  FitnessComponent:
+    description: "A single term in a fitness function"
+    properties:
+      metric: { type: Metric, required: true }
+      weight: { type: float, default: 1.0 }
+      threshold: { type: float }
+      direction: { type: string, enum: [minimize, maximize] }
+
+  SkillRecord:
+    description: "A versioned record of model skill for a specific configuration"
+    properties:
+      process_id: { type: ProcessId, required: true }
+      rung: { type: FidelityRung, required: true }
+      config_hash: { type: string, required: true }
+      region: { type: string, required: true }
+      regime: { type: string }
+      season: { type: string }
+      dataset: { type: string, required: true }
+      scores: { type: "map[string, float]", required: true }
+      observation_ids: { type: "list[string]" }
+      coupled_context: { type: "list[string]" }
+      evaluated_at: { type: datetime, required: true }
+      provenance: { type: string }
+
+  CostModel:
+    description: "Computational cost estimate for a representation"
+    properties:
+      flops_per_cell: { type: float, required: true }
+      memory_per_cell: { type: int, required: true }
+      gpu_capable: { type: bool, default: false }
+      scaling_behavior: { type: string, enum: [linear, quadratic, cubic, nlogn] }
+
+relations:
+  evaluated_by:
+    domain: Representation
+    range: ScoringProtocol
+    cardinality: many-to-many
+
+  uses_metric:
+    domain: ScoringProtocol
+    range: Metric
+    cardinality: many-to-many
+
+  scores:
+    domain: SkillRecord
+    range: ScoringProtocol
+    cardinality: many-to-one
+
+  has_cost:
+    domain: Representation
+    range: CostModel
+    cardinality: one-to-one
+
+  fitness_includes:
+    domain: FitnessFunction
+    range: Metric
+    cardinality: many-to-many
+    via: FitnessComponent

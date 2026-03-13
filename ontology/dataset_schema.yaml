@@ -1,0 +1,125 @@
+# Dataset Domain Ontology Schema
+# Defines classes for observation products, data sources, and access specifications.
+
+classes:
+  Observable:
+    description: "A physical/biological quantity that can be measured"
+    properties:
+      name: { type: string, required: true }
+      unit: { type: string, required: true }
+      description: { type: string }
+      typical_uncertainty: { type: float }
+
+  Product:
+    description: "A concrete dataset providing measurements of an Observable"
+    properties:
+      name: { type: string, required: true }
+      observable: { type: Observable, required: true }
+      provider: { type: string, required: true }
+      spatial_coverage: { type: string, required: true }
+      temporal_coverage: { type: string, required: true }
+      spatial_resolution: { type: string }
+      temporal_resolution: { type: string }
+      format: { type: string, enum: [NetCDF, COG, Zarr, GeoTIFF, CSV, Parquet, GRIB2] }
+      latency_class: { type: LatencyClass }
+      license: { type: License }
+      version: { type: string }
+
+  CatalogSource:
+    description: "A data catalog or discovery service"
+    properties:
+      name: { type: string, required: true }
+      url: { type: string, required: true }
+      protocol: { type: string, required: true, enum: [STAC, CMR, OPeNDAP, CKAN, WCS, WFS, S3] }
+    instances:
+      - { name: "NASA CMR", protocol: CMR }
+      - { name: "NASA Earthdata STAC", protocol: STAC }
+      - { name: "Copernicus CDS", protocol: CKAN }
+      - { name: "Microsoft Planetary Computer", protocol: STAC }
+      - { name: "Google Earth Engine", protocol: WCS }
+      - { name: "AWS Open Data", protocol: S3 }
+
+  AccessSpec:
+    description: "How to retrieve a specific Product from a CatalogSource"
+    properties:
+      product: { type: Product, required: true }
+      source: { type: CatalogSource, required: true }
+      collection_id: { type: string }
+      query_template: { type: string }
+      auth_required: { type: bool, default: false }
+
+  TransformRecipe:
+    description: "Processing steps to convert raw data into model-ready form"
+    properties:
+      name: { type: string, required: true }
+      steps:
+        type: "list[TransformStep]"
+        required: true
+
+  TransformStep:
+    description: "A single preprocessing step"
+    properties:
+      operation: { type: string, required: true, enum: [reproject, resample, regrid, mask, gap_fill, unit_convert, aggregate, subset, compute_derived] }
+      parameters: { type: object }
+
+  QualitySpec:
+    description: "Quality control specification for a Product"
+    properties:
+      completeness_threshold: { type: float, default: 0.8 }
+      outlier_method: { type: string, enum: [zscore, iqr, mad, domain_bounds] }
+      max_gap_days: { type: int }
+      uncertainty_field: { type: string }
+
+  License:
+    description: "Data license and usage terms"
+    properties:
+      spdx_id: { type: string }
+      attribution_required: { type: bool, default: true }
+      commercial_use: { type: bool, default: false }
+    instances:
+      - { spdx_id: "CC-BY-4.0", attribution_required: true, commercial_use: true }
+      - { spdx_id: "CC-BY-NC-4.0", attribution_required: true, commercial_use: false }
+      - { spdx_id: "CC0-1.0", attribution_required: false, commercial_use: true }
+      - { spdx_id: "US-Government", attribution_required: false, commercial_use: true }
+
+  LatencyClass:
+    description: "How quickly data becomes available after acquisition"
+    instances:
+      - { name: NearRealTime, max_delay: "6h" }
+      - { name: Expedited, max_delay: "48h" }
+      - { name: Standard, max_delay: "30d" }
+      - { name: Reanalysis, max_delay: "1y+" }
+      - { name: Climate, max_delay: "archive" }
+
+relations:
+  measures:
+    domain: Product
+    range: Observable
+    cardinality: many-to-one
+
+  available_from:
+    domain: Product
+    range: CatalogSource
+    cardinality: many-to-many
+    via: AccessSpec
+
+  transformed_by:
+    domain: Product
+    range: TransformRecipe
+    cardinality: many-to-many
+
+  quality_controlled_by:
+    domain: Product
+    range: QualitySpec
+    cardinality: many-to-one
+
+  licensed_under:
+    domain: Product
+    range: License
+    cardinality: many-to-one
+
+  potentially_measures:
+    domain: Product
+    range: Observable
+    description: "Candidate link discovered by Data Scout, not yet validated"
+    cardinality: many-to-many

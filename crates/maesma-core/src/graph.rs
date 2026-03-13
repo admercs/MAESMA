@@ -8,6 +8,26 @@ use crate::families::ProcessFamily;
 use crate::manifest::CouplingTier;
 use crate::process::{FidelityRung, ProcessId};
 
+// ── Serializable SAPG snapshot ───────────────────────────────────────
+
+/// A fully serializable snapshot of the SAPG (nodes + edges).
+/// Used for JSON/YAML export/import; the live `Sapg` struct uses
+/// petgraph internals that cannot derive Serialize directly.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SapgSnapshot {
+    pub nodes: Vec<ProcessNode>,
+    pub edges: Vec<SapgEdgeRecord>,
+}
+
+/// One directed edge in the serialized snapshot.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SapgEdgeRecord {
+    pub from: ProcessId,
+    pub to: ProcessId,
+    #[serde(flatten)]
+    pub edge: CouplingEdge,
+}
+
 // ── Node ─────────────────────────────────────────────────────────────
 
 /// A node in the SAPG represents an active process representation.
@@ -153,5 +173,151 @@ impl Sapg {
 impl Default for Sapg {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+// ── Serialization helpers ────────────────────────────────────────────
+
+impl Sapg {
+    /// Create a serializable snapshot capturing every node and edge.
+    pub fn snapshot(&self) -> SapgSnapshot {
+        let nodes: Vec<ProcessNode> = self.graph.node_weights().cloned().collect();
+        let edges: Vec<SapgEdgeRecord> = self
+            .graph
+            .edge_indices()
+            .filter_map(|ei| {
+                let (a, b) = self.graph.edge_endpoints(ei)?;
+                let edge = self.graph[ei].clone();
+                Some(SapgEdgeRecord {
+                    from: self.graph[a].process_id.clone(),
+                    to: self.graph[b].process_id.clone(),
+                    edge,
+                })
+            })
+            .collect();
+        SapgSnapshot { nodes, edges }
+    }
+
+    /// Reconstruct a live `Sapg` from a snapshot.
+    pub fn from_snapshot(snap: &SapgSnapshot) -> crate::Result<Self> {
+        let mut sapg = Self::new();
+        for node in &snap.nodes {
+            sapg.add_process(node.clone());
+        }
+        for rec in &snap.edges {
+            sapg.add_coupling(rec.from.clone(), rec.to.clone(), rec.edge.clone())?;
+        }
+        Ok(sapg)
+    }
+
+    /// Serialize to JSON string.
+    pub fn to_json(&self) -> crate::Result<String> {
+        serde_json::to_string_pretty(&self.snapshot())
+            .map_err(|e| crate::Error::Serialization(e.to_string()))
+    }
+
+    /// Deserialize from JSON string.
+    pub fn from_json(json: &str) -> crate::Result<Self> {
+        let snap: SapgSnapshot =
+            serde_json::from_str(json).map_err(|e| crate::Error::Serialization(e.to_string()))?;
+        Self::from_snapshot(&snap)
+    }
+
+    /// Serialize to YAML string.
+    pub fn to_yaml(&self) -> crate::Result<String> {
+        serde_yaml::to_string(&self.snapshot())
+            .map_err(|e| crate::Error::Serialization(e.to_string()))
+    }
+
+    /// Deserialize from YAML string.
+    pub fn from_yaml(yaml: &str) -> crate::Result<Self> {
+        let snap: SapgSnapshot =
+            serde_yaml::from_str(yaml).map_err(|e| crate::Error::Serialization(e.to_string()))?;
+        Self::from_snapshot(&snap)
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::families::ProcessFamily;
+    use crate::manifest::CouplingTier;
+    use crate::process::{FidelityRung, ProcessId};
+
+    fn make_test_sapg() -> Sapg {
+        let mut sapg = Sapg::new();
+        let id_a = ProcessId::new();
+        let id_b = ProcessId::new();
+
+        sapg.add_process(ProcessNode {
+            process_id: id_a.clone(),
+            name: "Hydro".into(),
+            family: ProcessFamily::Hydrology,
+            rung: FidelityRung::R0,
+            tier: CouplingTier::Slow,
+            cost: 1.0,
+        });
+        sapg.add_process(ProcessNode {
+            process_id: id_b.clone(),
+            name: "Fire".into(),
+            family: ProcessFamily::Fire,
+            rung: FidelityRung::R1,
+            tier: CouplingTier::Fast,
+            cost: 5.0,
+        });
+        sapg.add_coupling(
+            id_a,
+            id_b,
+            CouplingEdge {
+                variables: vec!["soil_moisture".into()],
+                strength: CouplingStrength::Moderate,
+                mode: CouplingMode::Asynchronous,
+            },
+        )
+        .unwrap();
+        sapg
+    }
+
+    #[test]
+    fn snapshot_round_trip() {
+        let sapg = make_test_sapg();
+        let snap = sapg.snapshot();
+        assert_eq!(snap.nodes.len(), 2);
+        assert_eq!(snap.edges.len(), 1);
+
+        let restored = Sapg::from_snapshot(&snap).unwrap();
+        assert_eq!(restored.node_count(), 2);
+        assert_eq!(restored.edge_count(), 1);
+    }
+
+    #[test]
+    fn json_round_trip() {
+        let sapg = make_test_sapg();
+        let json = sapg.to_json().unwrap();
+        assert!(json.contains("Hydro"));
+        assert!(json.contains("soil_moisture"));
+
+        let restored = Sapg::from_json(&json).unwrap();
+        assert_eq!(restored.node_count(), 2);
+        assert_eq!(restored.edge_count(), 1);
+    }
+
+    #[test]
+    fn yaml_round_trip() {
+        let sapg = make_test_sapg();
+        let yaml = sapg.to_yaml().unwrap();
+        assert!(yaml.contains("Hydro"));
+
+        let restored = Sapg::from_yaml(&yaml).unwrap();
+        assert_eq!(restored.node_count(), 2);
+        assert_eq!(restored.edge_count(), 1);
+    }
+
+    #[test]
+    fn empty_sapg_serialization() {
+        let sapg = Sapg::new();
+        let json = sapg.to_json().unwrap();
+        let restored = Sapg::from_json(&json).unwrap();
+        assert_eq!(restored.node_count(), 0);
+        assert_eq!(restored.edge_count(), 0);
     }
 }

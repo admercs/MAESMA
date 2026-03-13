@@ -18,14 +18,17 @@ pub mod regime;
 pub mod skills;
 pub mod spatial;
 pub mod units;
+pub mod variables;
 
 pub use automaton::{Constitution, HeartbeatConfig, ProcessAutomaton, ProcessSoul, SurvivalTier};
 pub use error::{Error, Result};
 pub use evolution::{EvolutionCandidate, EvolutionConfig, Population, ProcessLineage};
 pub use families::ProcessFamily;
+pub use graph::{Sapg, SapgEdgeRecord, SapgSnapshot};
 pub use manifest::ProcessManifest;
 pub use observations::{ObservationDataset, ObservationId, ObservationRegistry};
 pub use process::{FidelityRung, ProcessId, ProcessRepresentation};
 pub use regime::{Regime, RegimeTag};
 pub use skills::SkillRecord;
 pub use spatial::SpatialDomain;
+pub use variables::{BoundsResult, VariableCategory, VariableDescriptor, VariableRegistry};

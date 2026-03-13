@@ -1,0 +1,176 @@
+# Process Domain Ontology Schema
+# Defines the classes and relationships for Earth system process representations.
+
+classes:
+  ProcessFamily:
+    description: "Top-level domain of an Earth system process"
+    properties:
+      name: { type: string, required: true }
+      description: { type: string }
+    instances:
+      - Fire
+      - Hydrology
+      - Ecology
+      - Biogeochemistry
+      - Radiation
+      - Atmosphere
+      - Ocean
+      - Cryosphere
+      - Geomorphology
+      - Geology
+      - HumanSystems
+      - TrophicDynamics
+      - Evolution
+
+  Process:
+    description: "A named physical/biological/human process"
+    properties:
+      name: { type: string, required: true }
+      family: { type: ProcessFamily, required: true }
+      description: { type: string }
+      regime_tags: { type: "list[string]" }
+
+  Representation:
+    description: "A concrete numerical implementation of a Process at a given fidelity"
+    properties:
+      name: { type: string, required: true }
+      process: { type: Process, required: true }
+      rung: { type: FidelityRung, required: true }
+      version: { type: string, required: true }
+      origin: { type: ProcessOrigin, required: true }
+      lifecycle: { type: LifecycleStatus, required: true }
+
+  FidelityRung:
+    description: "Fidelity level of a process representation"
+    instances: [R0, R1, R2, R3]
+
+  ProcessOrigin:
+    description: "Provenance of a process representation"
+    instances:
+      - HandCoded
+      - Discovered
+      - Imported
+      - Federated
+
+  LifecycleStatus:
+    description: "Lifecycle stage of a representation"
+    instances: [Candidate, Provisional, Validated, Production, Archived]
+
+  StateVariable:
+    description: "A prognostic or diagnostic variable in the model state"
+    properties:
+      name: { type: string, required: true }
+      unit: { type: string, required: true }
+      category: { type: VariableCategory, required: true }
+      lower_bound: { type: float }
+      upper_bound: { type: float }
+      update_authority: { type: ProcessFamily }
+
+  VariableCategory:
+    description: "Broad category of a shared variable"
+    instances: [Forcing, SlowState, DisturbanceState]
+
+  Assumption:
+    description: "A scientific assumption made by a representation"
+    properties:
+      statement: { type: string, required: true }
+      valid_regimes: { type: "list[string]" }
+
+  Constraint:
+    description: "A constraint that must hold for valid coupling"
+    properties:
+      type: { type: string, required: true, enum: [conservation, unit_consistency, cfl, closure] }
+      expression: { type: string }
+
+  ScaleEnvelope:
+    description: "Spatial and temporal scale range of a representation"
+    properties:
+      dx_min: { type: float, required: true }
+      dx_max: { type: float, required: true }
+      dt_min: { type: float, required: true }
+      dt_max: { type: float, required: true }
+      coupling_tier: { type: CouplingTier, required: true }
+
+  CouplingTier:
+    description: "Temporal coupling frequency tier"
+    instances: [Slow, Fast]
+
+  NumericalForm:
+    description: "Numerical method used by a representation"
+    properties:
+      method: { type: string, required: true }
+      order: { type: int }
+      implicit: { type: bool }
+      stiffness_class: { type: string, enum: [non_stiff, mildly_stiff, stiff] }
+
+  CouplingOperator:
+    description: "Operator that transfers state between process domains"
+    properties:
+      name: { type: string, required: true }
+      from_family: { type: ProcessFamily, required: true }
+      to_family: { type: ProcessFamily, required: true }
+      variables: { type: "list[string]", required: true }
+      mode: { type: CouplingMode, required: true }
+
+  CouplingMode:
+    description: "Temporal coupling mode between processes"
+    instances: [Synchronous, Asynchronous, EventDriven]
+
+relations:
+  belongs_to:
+    domain: Representation
+    range: Process
+    cardinality: many-to-one
+
+  implements:
+    domain: Representation
+    range: Process
+    cardinality: many-to-one
+
+  requires_input:
+    domain: Representation
+    range: StateVariable
+    cardinality: many-to-many
+
+  produces_output:
+    domain: Representation
+    range: StateVariable
+    cardinality: many-to-many
+
+  assumes:
+    domain: Representation
+    range: Assumption
+    cardinality: many-to-many
+
+  constrained_by:
+    domain: Representation
+    range: Constraint
+    cardinality: many-to-many
+
+  compatible_with:
+    domain: Representation
+    range: Representation
+    cardinality: many-to-many
+    symmetric: true
+
+  incompatible_with:
+    domain: Representation
+    range: Representation
+    cardinality: many-to-many
+    symmetric: true
+
+  supersedes:
+    domain: Representation
+    range: Representation
+    cardinality: many-to-many
+
+  variant_of:
+    domain: Representation
+    range: Representation
+    cardinality: many-to-many
+    symmetric: true
+
+  requires_coupling_with:
+    domain: Representation
+    range: Representation
+    cardinality: many-to-many

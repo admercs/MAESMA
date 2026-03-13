@@ -101,6 +101,12 @@ enum KbCommands {
 
     /// Show knowledgebase statistics.
     Stats,
+
+    /// Validate all manifests in the knowledgebase.
+    Validate,
+
+    /// Check state-space closure across all KB processes.
+    CheckClosure,
 }
 
 #[tokio::main]
@@ -174,6 +180,67 @@ async fn main() -> anyhow::Result<()> {
                 let kb = maesma_knowledgebase::KnowledgebaseStore::open(&cli.db)?;
                 println!("Manifests:     {}", kb.manifest_count()?);
                 println!("Skill records: {}", kb.skill_count()?);
+            }
+            KbCommands::Validate => {
+                let kb = maesma_knowledgebase::KnowledgebaseStore::open(&cli.db)?;
+                let issues = kb.validate_all()?;
+                if issues.is_empty() {
+                    println!("All {} manifests valid", kb.manifest_count()?);
+                } else {
+                    for (name, problems) in &issues {
+                        println!("INVALID {name}:");
+                        for p in problems {
+                            println!("    - {p}");
+                        }
+                    }
+                    println!(
+                        "\n{} manifest(s) with issues out of {}",
+                        issues.len(),
+                        kb.manifest_count()?
+                    );
+                }
+            }
+            KbCommands::CheckClosure => {
+                let kb = maesma_knowledgebase::KnowledgebaseStore::open(&cli.db)?;
+                let forcing = [
+                    "P",
+                    "Tair",
+                    "RH",
+                    "VPD",
+                    "Wind",
+                    "SWdown",
+                    "LWdown",
+                    "CO2",
+                    "precipitation",
+                    "air_temperature",
+                    "wind_speed",
+                    "shortwave_radiation",
+                    "longwave_radiation",
+                ];
+                let report = kb.check_closure(&forcing)?;
+                println!("State-space closure report");
+                println!("  Total inputs:  {}", report.total_inputs);
+                println!("  Total outputs: {}", report.total_outputs);
+                if report.unsatisfied_inputs.is_empty() {
+                    println!("  All inputs satisfied");
+                } else {
+                    println!(
+                        "  {} unsatisfied input(s):",
+                        report.unsatisfied_inputs.len()
+                    );
+                    for v in &report.unsatisfied_inputs {
+                        println!("      - {v}");
+                    }
+                }
+                if !report.unused_outputs.is_empty() {
+                    println!(
+                        "  {} output(s) not consumed by any process:",
+                        report.unused_outputs.len()
+                    );
+                    for v in &report.unused_outputs {
+                        println!("      - {v}");
+                    }
+                }
             }
         },
 

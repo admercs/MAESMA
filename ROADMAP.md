@@ -9,10 +9,10 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 ### 0.1 Variable Registry & Unit System
 - [x] Define canonical variable registry schema (name, units, dimensionality, semantics, bounds, uncertainty)
 - [x] Implement unit-aware type system with compile-time checking
-- [ ] Define shared forcing variables: `P`, `Tair`, `RH/VPD`, `Wind`, `SWdown`, `LWdown`, `CO2`
-- [ ] Define shared slow state variables: `LAI`, `canopy_height`, `CBD/CBH`, fuel loads, soil moisture/temp profiles, `SWE`, soil C/N pools, `streamflow`, `water_table_proxy`
-- [ ] Define shared disturbance state: `burn_severity`, `mortality_fraction`, `soil_hydrophobicity`, `char_fraction`, `ash_nutrient_pulse`
-- [ ] Implement bounds checking, update-authority declarations, and discretization metadata
+- [x] Define shared forcing variables: `P`, `Tair`, `RH/VPD`, `Wind`, `SWdown`, `LWdown`, `CO2`
+- [x] Define shared slow state variables: `LAI`, `canopy_height`, `CBD/CBH`, fuel loads, soil moisture/temp profiles, `SWE`, soil C/N pools, `streamflow`, `water_table_proxy`
+- [x] Define shared disturbance state: `burn_severity`, `mortality_fraction`, `soil_hydrophobicity`, `char_fraction`, `ash_nutrient_pulse`
+- [x] Implement bounds checking, update-authority declarations, and discretization metadata
 
 ### 0.2 Process Module Manifest Schema
 - [x] Design manifest format (YAML/JSON): process name, category, scale envelope, I/O signatures, assumptions, closures, conservation, numerical requirements, calibration parameters, data requirements, backends, skill model, ontology links
@@ -23,7 +23,7 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 - [x] Define knowledgebase directory layout (family → process → rung: code + manifests + skill records)
 - [x] Implement KB loader: discover, parse, validate, build in-memory index over code + manifests + ontology links + skill records
 - [x] Implement KB query API: list representations, filter by scale/regime/budget/backend, rank by skill/cost, return compatibility edges
-- [ ] Implement `maesma kb validate` and `maesma kb check-closure` CLI commands
+- [x] Implement `maesma kb validate` and `maesma kb check-closure` CLI commands
 - [x] Implement KB deposit API: accept new representations (hand-coded or discovered) with manifest + provenance
 - [x] Populate initial knowledgebase entries:
   - Hydrology: H0 bucket, Green-Ampt, H1 Richards 1D, kinematic wave routing
@@ -40,7 +40,7 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 
 ### 0.4 Process Graph IR
 - [x] Define IR types (Rust structs/traits): `StateVariable` nodes, `ProcessRepresentation` edges, constraints, schedule, embedding declarations
-- [ ] Implement IR serialization/deserialization
+- [x] Implement IR serialization/deserialization
 - [x] Implement graph traversal and query utilities
 
 ### 0.5 Canonical Spatial Representations
@@ -91,11 +91,11 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 - [ ] Device assignment (GPU 0/1/2 + CPU) with pinned buffer exchange
 
 ### 2.2 Event-Driven Embedding
-- [ ] Ignition → spawn F1/F2 fire solver in bounding box
-- [ ] Extreme rain → upgrade H0→H1/H2 in affected basins
-- [ ] Drought → upgrade R0→R1 locally
+- [x] Ignition → spawn F1/F2 fire solver in bounding box
+- [x] Extreme rain → upgrade H0→H1/H2 in affected basins
+- [x] Drought → upgrade R0→R1 locally
 - [ ] Management action → spawn disturbance operator
-- [ ] Hysteresis management: hold timers, graceful downshift
+- [x] Hysteresis management: hold timers, graceful downshift
 - [ ] Embedded subdomain GPU allocation + boundary transfer
 
 ### 2.3 Error & Uncertainty Monitoring
@@ -197,12 +197,12 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 
 ### 4.1 Ontology Schema
 - [x] Process Domain: `ProcessFamily`, `Process`, `Representation`, `Module`, `StateVariable`, `Assumption`, `Constraint`, `ScaleEnvelope`, `NumericalForm`, `CouplingOperator`
-- [ ] Dataset Domain: `Observable`, `Product`, `CatalogSource`, `AccessSpec`, `TransformRecipe`, `QualitySpec`, `License`, `LatencyClass`
+- [x] Dataset Domain: `Observable`, `Product`, `CatalogSource`, `AccessSpec`, `TransformRecipe`, `QualitySpec`, `License`, `LatencyClass`
 - [x] Metric Domain: `Metric`, `ScoringProtocol`, `FitnessFunction`, `SkillRecord`, `SkillModel`, `CostModel`
-- [ ] Cross-domain relations: `requires_forcing`, `calibrates_against`, `evaluated_by`, `measured_by`, `validates`, `uses_metric`, `scores`, `discovered_via`, `penalizes`
+- [x] Cross-domain relations: `requires_forcing`, `calibrates_against`, `evaluated_by`, `measured_by`, `validates`, `uses_metric`, `scores`, `discovered_via`, `penalizes`
 - [ ] Data discovery relations: `potentially_measures`, `discovery_query`, `relevance_score`, `novelty_score`
 - [x] In-memory property graph from YAML manifests; cross-domain query API
-- [ ] Schema files: `process_schema.yaml`, `dataset_schema.yaml`, `metric_schema.yaml`, `cross_domain_schema.yaml`, `geoengineering_schema.yaml`, `planetary_defense_schema.yaml`
+- [x] Schema files: `process_schema.yaml`, `dataset_schema.yaml`, `metric_schema.yaml`, `cross_domain_schema.yaml`, `geoengineering_schema.yaml`, `planetary_defense_schema.yaml`
 
 ### 4.2 Geoengineering Ontology Domain
 - [ ] Classes: `Intervention`, `ControlTarget`, `InterventionSchedule`, `SideEffectConstraint`, `TerminationScenario`, `StrategyRecord`, `InterventionCostModel`

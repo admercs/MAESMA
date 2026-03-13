@@ -4,6 +4,7 @@
 //! handles event-driven process triggers (e.g., fire ignition), and
 //! provides real-time health monitoring via the runtime sentinel.
 
+pub mod embedding;
 pub mod events;
 pub mod health;
 pub mod heartbeat;
@@ -11,6 +12,7 @@ pub mod pipeline;
 pub mod scheduler;
 pub mod state;
 
+pub use embedding::{ActiveEmbedding, EmbeddingEngine, EmbeddingRule};
 pub use events::{Event, EventBus};
 pub use health::HealthMonitor;
 pub use heartbeat::{HeartbeatDaemon, HeartbeatOutcome};

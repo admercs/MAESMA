@@ -16,4 +16,4 @@ pub use ontology_seed::{RelationStats, generate_seed_relations, relation_statist
 pub use query::QueryBuilder;
 pub use seed::{SourceModel, generate_seed_manifests};
 pub use seed_extended::generate_extended_manifests;
-pub use store::KnowledgebaseStore;
+pub use store::{ClosureReport, KnowledgebaseStore};

@@ -219,4 +219,128 @@ impl KnowledgebaseStore {
 
         Ok(())
     }
+
+    // ── Validation & closure ─────────────────────────────────────
+
+    /// Retrieve all stored manifests (full objects).
+    pub fn all_manifests(&self) -> maesma_core::Result<Vec<ProcessManifest>> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT data FROM manifests")
+            .map_err(|e| maesma_core::Error::Knowledgebase(e.to_string()))?;
+        let rows = stmt
+            .query_map([], |row| {
+                let data: String = row.get(0)?;
+                Ok(data)
+            })
+            .map_err(|e| maesma_core::Error::Knowledgebase(e.to_string()))?;
+        let mut out = Vec::new();
+        for r in rows {
+            let data = r.map_err(|e| maesma_core::Error::Knowledgebase(e.to_string()))?;
+            let m: ProcessManifest = serde_json::from_str(&data)
+                .map_err(|e| maesma_core::Error::Serialization(e.to_string()))?;
+            out.push(m);
+        }
+        Ok(out)
+    }
+
+    /// Validate every manifest in the KB. Returns a list of (name, issues).
+    pub fn validate_all(&self) -> maesma_core::Result<Vec<(String, Vec<String>)>> {
+        let manifests = self.all_manifests()?;
+        let mut results = Vec::new();
+        for m in &manifests {
+            let mut issues = Vec::new();
+            // Name must be non-empty
+            if m.name.trim().is_empty() {
+                issues.push("empty name".into());
+            }
+            // I/O contract: must declare at least one output
+            if m.io.outputs.is_empty() {
+                issues.push("no outputs declared".into());
+            }
+            // Scale envelope sanity
+            if m.io.inputs.iter().any(|v| v.unit.is_empty()) {
+                issues.push("input variable with empty unit".into());
+            }
+            if m.io.outputs.iter().any(|v| v.unit.is_empty()) {
+                issues.push("output variable with empty unit".into());
+            }
+            if m.scale.dx_min > m.scale.dx_max {
+                issues.push(format!(
+                    "dx_min ({}) > dx_max ({})",
+                    m.scale.dx_min, m.scale.dx_max
+                ));
+            }
+            if m.scale.dt_min > m.scale.dt_max {
+                issues.push(format!(
+                    "dt_min ({}) > dt_max ({})",
+                    m.scale.dt_min, m.scale.dt_max
+                ));
+            }
+            // Parameters: bounds consistency
+            for p in &m.io.parameters {
+                if let Some((lo, hi)) = p.bounds {
+                    if lo > hi {
+                        issues.push(format!("param '{}': lower bound > upper bound", p.name));
+                    }
+                    if p.default < lo || p.default > hi {
+                        issues.push(format!("param '{}': default outside bounds", p.name));
+                    }
+                }
+            }
+            if !issues.is_empty() {
+                results.push((m.name.clone(), issues));
+            }
+        }
+        Ok(results)
+    }
+
+    /// Check state-space closure: every input consumed by any process
+    /// must be produced as an output by at least one other process,
+    /// or be a recognized forcing variable.
+    pub fn check_closure(&self, forcing_vars: &[&str]) -> maesma_core::Result<ClosureReport> {
+        let manifests = self.all_manifests()?;
+        let mut all_outputs: std::collections::HashSet<String> = std::collections::HashSet::new();
+        let mut all_inputs: std::collections::HashSet<String> = std::collections::HashSet::new();
+
+        for m in &manifests {
+            for v in &m.io.outputs {
+                all_outputs.insert(v.name.clone());
+            }
+            for v in &m.io.inputs {
+                all_inputs.insert(v.name.clone());
+            }
+        }
+
+        let forcing_set: std::collections::HashSet<String> =
+            forcing_vars.iter().map(|s| s.to_string()).collect();
+
+        let unsatisfied: Vec<String> = all_inputs
+            .iter()
+            .filter(|v| !all_outputs.contains(v.as_str()) && !forcing_set.contains(v.as_str()))
+            .cloned()
+            .collect();
+
+        let unused_outputs: Vec<String> = all_outputs
+            .iter()
+            .filter(|v| !all_inputs.contains(v.as_str()))
+            .cloned()
+            .collect();
+
+        Ok(ClosureReport {
+            total_inputs: all_inputs.len(),
+            total_outputs: all_outputs.len(),
+            unsatisfied_inputs: unsatisfied,
+            unused_outputs,
+        })
+    }
+}
+
+/// Result of a state-space closure check.
+#[derive(Debug, Clone)]
+pub struct ClosureReport {
+    pub total_inputs: usize,
+    pub total_outputs: usize,
+    pub unsatisfied_inputs: Vec<String>,
+    pub unused_outputs: Vec<String>,
 }
