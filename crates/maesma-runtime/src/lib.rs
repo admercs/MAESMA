@@ -11,6 +11,7 @@ pub mod heartbeat;
 pub mod pipeline;
 pub mod scheduler;
 pub mod state;
+pub mod subcycling;
 
 pub use embedding::{ActiveEmbedding, EmbeddingEngine, EmbeddingRule};
 pub use events::{Event, EventBus};
@@ -19,3 +20,6 @@ pub use heartbeat::{HeartbeatDaemon, HeartbeatOutcome};
 pub use pipeline::build_default_pipeline;
 pub use scheduler::Scheduler;
 pub use state::{ProcessStateAdapter, SimulationState};
+pub use subcycling::{
+    DeviceAssignment, DeviceInventory, SubcycleConfig, SubcyclePlan, SubcycleStats,
+};

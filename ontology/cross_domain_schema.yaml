@@ -58,6 +58,43 @@ relations:
       novelty_score: { type: float, range: "[0, 1]" }
       status: { type: string, enum: [candidate, validated, rejected] }
 
+
+  # Data discovery relations
+  potentially_measures:
+    domain: Product
+    range: Observable
+    description: "A candidate product that might measure this observable (unvalidated)"
+    cardinality: many-to-many
+    properties:
+      confidence: { type: float, range: "[0, 1]", description: "Automated matching confidence" }
+      variable_mapping: { type: string, description: "Mapping from product variable to observable" }
+      resolution_compatible: { type: boolean, description: "Whether spatial/temporal resolution is adequate" }
+      discovered_by: { type: string, enum: [catalog_search, peer_recommendation, manual_entry] }
+
+  relevance_score:
+    domain: Product
+    range: Representation
+    description: "How relevant a product is for evaluating a specific representation"
+    cardinality: many-to-many
+    properties:
+      score: { type: float, range: "[0, 1]" }
+      spatial_overlap: { type: float, range: "[0, 1]", description: "Fraction of model domain covered" }
+      temporal_overlap: { type: float, range: "[0, 1]", description: "Fraction of simulation period covered" }
+      resolution_ratio: { type: float, description: "obs_resolution / model_resolution" }
+      uncertainty_adequacy: { type: float, range: "[0, 1]", description: "Whether obs uncertainty is small enough" }
+
+  novelty_score:
+    domain: Product
+    range: ObservationRegistry
+    description: "How much new information a product would add to the existing observation portfolio"
+    cardinality: many-to-one
+    properties:
+      score: { type: float, range: "[0, 1]" }
+      new_spatial_coverage: { type: float, range: "[0, 1]", description: "Fraction of new area covered" }
+      new_regime_coverage: { type: list, items: string, description: "New regimes this product covers" }
+      independence: { type: float, range: "[0, 1]", description: "Statistical independence from existing products" }
+      new_observable: { type: boolean, description: "Whether this is a previously unobserved quantity" }
+
   # Cross-family coupling relations
   drives:
     domain: ProcessFamily

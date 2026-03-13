@@ -252,3 +252,201 @@ fn sapg_json_round_trip_integration() {
     let restored = maesma_core::Sapg::from_json(&json).unwrap();
     assert_eq!(restored.node_count(), 1);
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// Round 4 integration tests
+// ═══════════════════════════════════════════════════════════════════════
+
+// ── Topology adapter tests ──────────────────────────────────────────
+
+#[test]
+fn topology_grid_aggregation_integration() {
+    use maesma_core::spatial::RegularGrid;
+    use maesma_core::topology::{coarse_grid_to_grid, grid_to_coarse_grid};
+
+    let fine = RegularGrid {
+        nx: 10,
+        ny: 10,
+        nz: 1,
+        dx: 100.0,
+        dy: 100.0,
+        origin: (0.0, 0.0),
+        crs: "EPSG:4326".into(),
+    };
+    let coarse = RegularGrid {
+        nx: 5,
+        ny: 5,
+        nz: 1,
+        dx: 200.0,
+        dy: 200.0,
+        origin: (0.0, 0.0),
+        crs: "EPSG:4326".into(),
+    };
+
+    let agg = grid_to_coarse_grid(&fine, &coarse).unwrap();
+    assert_eq!(agg.n_src, 100);
+    assert_eq!(agg.n_dst, 25);
+    assert!(agg.conservative);
+
+    // Uniform field should aggregate to same value
+    let src = vec![42.0; 100];
+    let dst = agg.apply(&src);
+    assert_eq!(dst.len(), 25);
+    for v in &dst {
+        assert!((v - 42.0).abs() < 1e-10);
+    }
+
+    // Disaggregation
+    let disagg = coarse_grid_to_grid(&coarse, &fine).unwrap();
+    let back = disagg.apply(&dst);
+    assert_eq!(back.len(), 100);
+    for v in &back {
+        assert!((v - 42.0).abs() < 1e-10);
+    }
+}
+
+#[test]
+fn topology_network_transfer_integration() {
+    use maesma_core::spatial::{NetworkTopology, RegularGrid};
+    use maesma_core::topology::{grid_to_network, network_to_grid};
+
+    let grid = RegularGrid {
+        nx: 4,
+        ny: 4,
+        nz: 1,
+        dx: 100.0,
+        dy: 100.0,
+        origin: (0.0, 0.0),
+        crs: "EPSG:4326".into(),
+    };
+    let net = NetworkTopology {
+        n_nodes: 3,
+        n_edges: 2,
+        crs: "EPSG:4326".into(),
+    };
+    let coords = vec![(0, 0), (2, 2), (3, 3)];
+
+    let g2n = grid_to_network(&grid, &net, &coords).unwrap();
+    let _n2g = network_to_grid(&net, &grid, &coords).unwrap();
+
+    // Grid field with distinct values
+    let mut field = vec![0.0; 16];
+    field[0] = 10.0; // (0,0)
+    field[10] = 20.0; // (2,2)
+    field[15] = 30.0; // (3,3)
+
+    let net_vals = g2n.apply(&field);
+    assert_eq!(net_vals.len(), 3);
+    assert!((net_vals[0] - 10.0).abs() < 1e-10);
+    assert!((net_vals[1] - 20.0).abs() < 1e-10);
+    assert!((net_vals[2] - 30.0).abs() < 1e-10);
+}
+
+#[test]
+fn topology_info_loss_tracking() {
+    use maesma_core::topology::compute_info_loss;
+
+    let src = vec![1.0, 2.0, 3.0, 4.0];
+    let dst = vec![1.5, 2.5, 3.5]; // Aggregated with slight mass loss
+    let src_areas = vec![1.0; 4];
+    let dst_areas = vec![1.0; 3];
+
+    let loss = compute_info_loss("temperature", &src, &dst, &src_areas, &dst_areas);
+    assert!(loss.relative_error > 0.0); // There is info loss
+    assert_eq!(loss.variable, "temperature");
+}
+
+// ── Compiler rung selection tests ───────────────────────────────────
+
+#[test]
+fn compiler_rung_selection_integration() {
+    use maesma_compiler::selection::{SelectionConstraints, build_assembly_plan};
+
+    let manifests = maesma_knowledgebase::generate_seed_manifests();
+    let constraints = SelectionConstraints {
+        target_dx: 1000.0,
+        target_dt: 86400.0,
+        flops_budget: 1e12,
+        n_cells: 10000,
+        regime_tags: vec![],
+        gpu_available: false,
+    };
+    let plan = build_assembly_plan(&manifests, &constraints);
+    assert!(
+        !plan.selections.is_empty(),
+        "Should select at least one process"
+    );
+    assert!(plan.total_cost > 0.0);
+}
+
+// ── Subcycling tests ────────────────────────────────────────────────
+
+#[test]
+fn subcycling_plan_integration() {
+    use maesma_core::process::ProcessId;
+    use maesma_runtime::subcycling::{DeviceInventory, build_subcycle_plan};
+    use std::collections::HashMap;
+
+    let p1 = ProcessId::new();
+    let p2 = ProcessId::new();
+
+    let mut dts = HashMap::new();
+    dts.insert(p1.clone(), 60.0); // Fire: 1-minute steps
+    dts.insert(p2.clone(), 86400.0); // Ecology: daily steps
+
+    let gpu_cap = HashMap::new();
+    let mem = HashMap::new();
+    let inv = DeviceInventory::detect();
+
+    let plan = build_subcycle_plan("mixed", 86400.0, &dts, &gpu_cap, &mem, 1000, &inv);
+    assert_eq!(plan.configs.len(), 2);
+
+    let fire_cfg = plan.configs.iter().find(|c| c.process_id == p1).unwrap();
+    assert_eq!(fire_cfg.n_substeps, 1440);
+
+    let eco_cfg = plan.configs.iter().find(|c| c.process_id == p2).unwrap();
+    assert_eq!(eco_cfg.n_substeps, 1);
+}
+
+#[test]
+fn device_inventory_with_gpus() {
+    use maesma_runtime::subcycling::DeviceInventory;
+
+    let inv = DeviceInventory::with_gpus(16, vec![(0, 8192), (1, 16384)]);
+    assert!(inv.has_gpu());
+    assert_eq!(inv.total_gpu_memory(), 24576);
+    assert_eq!(inv.n_cpus, 16);
+}
+
+// ── Comparison protocol tests ───────────────────────────────────────
+
+#[test]
+fn protocol_registry_defaults_integration() {
+    use maesma_core::families::ProcessFamily;
+    use maesma_core::protocols::ProtocolRegistry;
+
+    let reg = ProtocolRegistry::with_defaults();
+    assert!(reg.len() >= 8);
+
+    // Hydrology should have at least 2 protocols
+    let hydro = reg.for_family(ProcessFamily::Hydrology);
+    assert!(hydro.len() >= 2);
+
+    // Fire should have at least 1
+    let fire = reg.for_family(ProcessFamily::Fire);
+    assert!(!fire.is_empty());
+
+    // Cryosphere should have SWE protocol
+    let cryo = reg.for_family(ProcessFamily::Cryosphere);
+    assert!(!cryo.is_empty());
+}
+
+#[test]
+fn protocol_observable_lookup() {
+    use maesma_core::protocols::ProtocolRegistry;
+
+    let reg = ProtocolRegistry::with_defaults();
+    let streamflow = reg.for_observable("streamflow");
+    assert_eq!(streamflow.len(), 1);
+    assert_eq!(streamflow[0].primary_metric, "kge");
+}

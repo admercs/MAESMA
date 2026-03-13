@@ -8,6 +8,7 @@
 //! - Operator-splitting schedule generation
 
 pub mod schedule;
+pub mod selection;
 pub mod validators;
 
 use std::collections::HashSet;
@@ -15,6 +16,10 @@ use std::collections::HashSet;
 use maesma_core::graph::Sapg;
 use tracing::info;
 
+pub use selection::{
+    AssemblyPlan, CouplingStrategy, DevicePreference, DiscretizationPlan, RungSelection,
+    SelectionConstraints, SplittingOrder,
+};
 pub use validators::ManifestIndex;
 
 /// Result of compiling a SAPG into a runnable schedule.

@@ -45,7 +45,7 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 
 ### 0.5 Canonical Spatial Representations
 - [x] Implement raster grid, river network graph, and embedded raster subdomain representations
-- [ ] Define topology adapters (grid ↔ mesh ↔ network ↔ patch mosaic)
+- [x] Define topology adapters (grid ↔ mesh ↔ network ↔ patch mosaic)
 
 ### 0.6 Observation Registry
 - [x] Define observation dataset manifest schema: observable name, spatiotemporal coverage, uncertainty, compatibility constraints, scoring protocol
@@ -60,7 +60,7 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 ### 0.7 Skill Metric Library
 - [x] Implement: RMSE, MAE, bias, correlation (Pearson/Spearman), KGE + decomposition, CRPS, timing errors, conservation residuals
 - [x] Implement multi-objective scoring aggregation (weighted + Pareto)
-- [ ] Define comparison protocols per observation type
+- [x] Define comparison protocols per observation type
 
 ---
 
@@ -72,8 +72,8 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 
 ### 1.2 Model Compiler
 - [x] Process set selection from knowledgebase via neural inference
-- [ ] Rung selection per family given scale/regime/budget
-- [ ] Discretization + coupling strategy selection (operator splitting vs monolithic)
+- [x] Rung selection per family given scale/regime/budget
+- [x] Discretization + coupling strategy selection (operator splitting vs monolithic)
 - [x] Executable schedule generation (stepping order, coupling frequency, remapping operators)
 
 ### 1.3 Conservative Remapping & Projection
@@ -87,8 +87,8 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 
 ### 2.1 Task Scheduler
 - [x] Task graph execution engine with coupling cadence management
-- [ ] Asynchronous subcycling for fast physics in subdomains
-- [ ] Device assignment (GPU 0/1/2 + CPU) with pinned buffer exchange
+- [x] Asynchronous subcycling for fast physics in subdomains
+- [x] Device assignment (GPU 0/1/2 + CPU) with pinned buffer exchange
 
 ### 2.2 Event-Driven Embedding
 - [x] Ignition → spawn F1/F2 fire solver in bounding box
@@ -200,7 +200,7 @@ Implementation roadmap for MAESMA. Phases build toward a fully autonomous agent 
 - [x] Dataset Domain: `Observable`, `Product`, `CatalogSource`, `AccessSpec`, `TransformRecipe`, `QualitySpec`, `License`, `LatencyClass`
 - [x] Metric Domain: `Metric`, `ScoringProtocol`, `FitnessFunction`, `SkillRecord`, `SkillModel`, `CostModel`
 - [x] Cross-domain relations: `requires_forcing`, `calibrates_against`, `evaluated_by`, `measured_by`, `validates`, `uses_metric`, `scores`, `discovered_via`, `penalizes`
-- [ ] Data discovery relations: `potentially_measures`, `discovery_query`, `relevance_score`, `novelty_score`
+- [x] Data discovery relations: `potentially_measures`, `discovery_query`, `relevance_score`, `novelty_score`
 - [x] In-memory property graph from YAML manifests; cross-domain query API
 - [x] Schema files: `process_schema.yaml`, `dataset_schema.yaml`, `metric_schema.yaml`, `cross_domain_schema.yaml`, `geoengineering_schema.yaml`, `planetary_defense_schema.yaml`
 
