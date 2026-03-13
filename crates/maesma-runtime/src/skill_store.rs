@@ -170,6 +170,7 @@ mod tests {
             evaluated_at: "2024-01-01T00:00:00Z".to_string(),
             benchmark: None,
             process_hash: None,
+            provenance: maesma_core::skills::SkillProvenance::ExpertPrior,
         }
     }
 

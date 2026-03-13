@@ -6,15 +6,21 @@
 
 pub mod automaton;
 pub mod data_contracts;
+pub mod data_plane;
+pub mod diagnostics;
 pub mod error;
 pub mod evolution;
 pub mod families;
 pub mod graph;
+pub mod impact;
 pub mod manifest;
 pub mod metrics;
+pub mod msd;
 pub mod observations;
 pub mod ontology;
+pub mod optimization;
 pub mod process;
+pub mod process_discovery;
 pub mod protocols;
 pub mod regime;
 pub mod skills;

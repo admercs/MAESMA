@@ -30,6 +30,23 @@ pub struct SkillRecord {
     pub benchmark: Option<String>,
     /// Content hash of the process version evaluated.
     pub process_hash: Option<String>,
+    /// Provenance: expert prior or empirical posterior.
+    pub provenance: SkillProvenance,
+}
+
+/// Distinguishes expert priors from empirical posteriors, enabling the
+/// knowledgebase learning loop to update annotations.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum SkillProvenance {
+    /// Set by a domain expert; can be overridden by empirical data.
+    ExpertPrior,
+    /// Derived from benchmark results.
+    EmpiricalPosterior,
+    /// Blended: prior updated with evidence.
+    Blended {
+        prior_weight: u32,
+        posterior_weight: u32,
+    },
 }
 
 /// A collection of skill records, typically for one process.

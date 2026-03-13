@@ -572,6 +572,7 @@ fn skill_store_insert_query_roundtrip() {
         evaluated_at: "2024-06-01".into(),
         benchmark: None,
         process_hash: None,
+        provenance: maesma_core::skills::SkillProvenance::ExpertPrior,
     });
     assert_eq!(store.count(), 1);
     assert_eq!(store.query_by_region("TestRegion").len(), 1);

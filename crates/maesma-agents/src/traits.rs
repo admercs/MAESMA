@@ -43,6 +43,11 @@ pub enum AgentRole {
     RuntimeSentinel,
     FoundationModel,
     AutonomousObservation,
+    IntentScope,
+    ActiveLearning,
+    SkillLibrarian,
+    MsdCoupling,
+    ScenarioDiscovery,
 }
 
 impl AgentRole {
@@ -74,6 +79,11 @@ impl AgentRole {
             Self::RuntimeSentinel,
             Self::FoundationModel,
             Self::AutonomousObservation,
+            Self::IntentScope,
+            Self::ActiveLearning,
+            Self::SkillLibrarian,
+            Self::MsdCoupling,
+            Self::ScenarioDiscovery,
         ]
     }
 
@@ -105,6 +115,11 @@ impl AgentRole {
             Self::RuntimeSentinel => "Monitors runtime health and detects anomalies",
             Self::FoundationModel => "Orchestrates foundation model inference",
             Self::AutonomousObservation => "Controls autonomous observation platforms",
+            Self::IntentScope => "Parses user objectives into observable requirements",
+            Self::ActiveLearning => "Identifies high-uncertainty configurations for experiments",
+            Self::SkillLibrarian => "Manages skill score lifecycle and drift detection",
+            Self::MsdCoupling => "Couples human and natural systems for MSD analysis",
+            Self::ScenarioDiscovery => "Explores scenario spaces to find tipping points",
         }
     }
 }

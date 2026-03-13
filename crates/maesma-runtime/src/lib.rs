@@ -5,7 +5,9 @@
 //! provides real-time health monitoring via the runtime sentinel.
 
 pub mod embedding;
+pub mod event_store;
 pub mod events;
+pub mod geo_control;
 pub mod health;
 pub mod heartbeat;
 pub mod observation_adapters;

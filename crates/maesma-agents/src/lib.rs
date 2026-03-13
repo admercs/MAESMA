@@ -34,5 +34,12 @@ pub mod selection;
 pub mod sensitivity;
 pub mod trophic;
 
+// New agents — Phase 5 gap fills.
+pub mod active_learning;
+pub mod intent_scope;
+pub mod msd_coupling;
+pub mod scenario_discovery;
+pub mod skill_librarian;
+
 pub use registry::AgentRegistry;
 pub use traits::{Agent, AgentContext, AgentId, AgentResult, AgentRole};
