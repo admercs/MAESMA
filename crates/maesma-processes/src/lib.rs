@@ -80,15 +80,13 @@ pub fn create_runner(family: ProcessFamily, rung: FidelityRung) -> Option<Box<dy
         }
         // Trophic Dynamics
         (ProcessFamily::TrophicDynamics, FidelityRung::R0) => {
-            Some(Box::new(trophic_dynamics::StaticFoodWeb::default()))
+            Some(Box::new(trophic_dynamics::StaticFoodWeb))
         }
         (ProcessFamily::TrophicDynamics, FidelityRung::R1) => {
             Some(Box::new(trophic_dynamics::LotkaVolterraTrophic::default()))
         }
         // Evolution
-        (ProcessFamily::Evolution, FidelityRung::R0) => {
-            Some(Box::new(evolution::FixedTraits::default()))
-        }
+        (ProcessFamily::Evolution, FidelityRung::R0) => Some(Box::new(evolution::FixedTraits)),
         (ProcessFamily::Evolution, FidelityRung::R1) => {
             Some(Box::new(evolution::QuantitativeGeneticsEvolution::default()))
         }

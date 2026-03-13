@@ -37,14 +37,14 @@ pub fn detect_unit_mismatches(
 ) -> Vec<UnitMismatch> {
     let mut mismatches = Vec::new();
     for (var, consumer_unit) in consumers {
-        if let Some(producer_unit) = producers.get(var) {
-            if producer_unit != consumer_unit {
-                mismatches.push(UnitMismatch {
-                    variable: var.clone(),
-                    producer_unit: producer_unit.clone(),
-                    consumer_unit: consumer_unit.clone(),
-                });
-            }
+        if let Some(producer_unit) = producers.get(var)
+            && producer_unit != consumer_unit
+        {
+            mismatches.push(UnitMismatch {
+                variable: var.clone(),
+                producer_unit: producer_unit.clone(),
+                consumer_unit: consumer_unit.clone(),
+            });
         }
     }
     mismatches

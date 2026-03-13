@@ -160,19 +160,19 @@ impl Agent for ActiveLearningAgent {
                 "Central_Africa",
             ];
             for region in &all_regions {
-                if !tested.iter().any(|t| t == region) {
-                    if let Some(source) = tested.first() {
-                        proposals.push(ExperimentProposal {
-                            description: format!("Cross-region transfer: {} → {}", source, region),
-                            expected_gain: 0.6,
-                            kind: ExperimentKind::CrossRegion {
-                                source_region: source.to_string(),
-                                target_region: region.to_string(),
-                            },
-                            config: serde_json::json!({"source": source, "target": region}),
-                            estimated_cost: 1.0,
-                        });
-                    }
+                if !tested.iter().any(|t| t == region)
+                    && let Some(source) = tested.first()
+                {
+                    proposals.push(ExperimentProposal {
+                        description: format!("Cross-region transfer: {} → {}", source, region),
+                        expected_gain: 0.6,
+                        kind: ExperimentKind::CrossRegion {
+                            source_region: source.to_string(),
+                            target_region: region.to_string(),
+                        },
+                        config: serde_json::json!({"source": source, "target": region}),
+                        estimated_cost: 1.0,
+                    });
                 }
             }
         }

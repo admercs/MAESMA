@@ -42,11 +42,9 @@ jobs:
 
       - name: Clippy
         run: cargo clippy --workspace -- -D warnings
-        continue-on-error: true
 
       - name: Format check
         run: cargo fmt --all -- --check
-        continue-on-error: true
 
   paper:
     name: Paper (Typst)

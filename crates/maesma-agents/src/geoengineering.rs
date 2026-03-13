@@ -59,7 +59,7 @@ impl GeoengineeringAgent {
         let accumulated = magnitude * duration_years;
         let rebound = accumulated * 0.02;
         let rate = rebound / (duration_years * 0.1).max(1.0);
-        let ramp_down = (accumulated * 2.0).max(10.0).min(100.0);
+        let ramp_down = (accumulated * 2.0).clamp(10.0, 100.0);
         TerminationShock {
             rebound_degrees: rebound,
             rebound_rate: rate,

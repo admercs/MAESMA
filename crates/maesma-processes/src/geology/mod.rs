@@ -23,8 +23,8 @@ pub struct StaticGeology {
 impl Default for StaticGeology {
     fn default() -> Self {
         Self {
-            default_weathering_rate: 0.03,  // mm/yr — typical granite
-            default_permeability: 1e-15,    // m² — tight crystalline
+            default_weathering_rate: 0.03, // mm/yr — typical granite
+            default_permeability: 1e-15,   // m² — tight crystalline
         }
     }
 }
@@ -79,7 +79,7 @@ impl Default for TectonicUplift {
     fn default() -> Self {
         Self {
             uplift_rate_mm_yr: 0.5,
-            activation_energy_kj: 63.0,  // silicate weathering Ea
+            activation_energy_kj: 63.0, // silicate weathering Ea
             weathering_prefactor: 1.0,
         }
     }
@@ -144,6 +144,9 @@ mod tests {
         let t = TectonicUplift::default();
         assert_eq!(t.family(), ProcessFamily::Geology);
         assert_eq!(t.rung(), FidelityRung::R1);
-        assert!(t.outputs().contains(&"silicate_weathering_flux".to_string()));
+        assert!(
+            t.outputs()
+                .contains(&"silicate_weathering_flux".to_string())
+        );
     }
 }

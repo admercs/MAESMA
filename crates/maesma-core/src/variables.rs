@@ -84,15 +84,15 @@ impl VariableRegistry {
         match self.get(name) {
             None => BoundsResult::UnknownVariable,
             Some(desc) => {
-                if let Some(lo) = desc.lower_bound {
-                    if value < lo {
-                        return BoundsResult::BelowLower { value, bound: lo };
-                    }
+                if let Some(lo) = desc.lower_bound
+                    && value < lo
+                {
+                    return BoundsResult::BelowLower { value, bound: lo };
                 }
-                if let Some(hi) = desc.upper_bound {
-                    if value > hi {
-                        return BoundsResult::AboveUpper { value, bound: hi };
-                    }
+                if let Some(hi) = desc.upper_bound
+                    && value > hi
+                {
+                    return BoundsResult::AboveUpper { value, bound: hi };
                 }
                 BoundsResult::Ok
             }

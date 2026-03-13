@@ -127,7 +127,7 @@ pub fn grid_to_coarse_grid(
 ) -> crate::Result<RemapOperator> {
     let rx = fine.nx / coarse.nx;
     let ry = fine.ny / coarse.ny;
-    if fine.nx % coarse.nx != 0 || fine.ny % coarse.ny != 0 {
+    if !fine.nx.is_multiple_of(coarse.nx) || !fine.ny.is_multiple_of(coarse.ny) {
         return Err(crate::Error::CompilationFailed(
             "Fine grid dimensions must be evenly divisible by coarse grid".into(),
         ));
@@ -166,7 +166,7 @@ pub fn coarse_grid_to_grid(
 ) -> crate::Result<RemapOperator> {
     let rx = fine.nx / coarse.nx;
     let ry = fine.ny / coarse.ny;
-    if fine.nx % coarse.nx != 0 || fine.ny % coarse.ny != 0 {
+    if !fine.nx.is_multiple_of(coarse.nx) || !fine.ny.is_multiple_of(coarse.ny) {
         return Err(crate::Error::CompilationFailed(
             "Fine grid dimensions must be evenly divisible by coarse grid".into(),
         ));

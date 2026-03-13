@@ -8,26 +8,24 @@ use maesma_core::observations::*;
 
 /// Generate the full seed catalog of observation datasets.
 pub fn generate_seed_observations() -> Vec<ObservationDataset> {
-    let mut ds = Vec::with_capacity(95);
-
-    // ---- Hydrology ----
-    ds.push(usgs_nwis());
-    ds.push(smap_l3());
-    ds.push(grace_mascons());
-
-    // ---- Radiation & Energy ----
-    ds.push(fluxnet());
-    ds.push(ceres_ebaf());
-    ds.push(arm_sites());
-
-    // ---- Fire ----
-    ds.push(mtbs());
-    ds.push(viirs_active_fire());
-    ds.push(ravg());
-
-    // ---- Ecology / Vegetation ----
-    ds.push(modis_lai());
-    ds.push(modis_et());
+    let mut ds = vec![
+        // ---- Hydrology ----
+        usgs_nwis(),
+        smap_l3(),
+        grace_mascons(),
+        // ---- Radiation & Energy ----
+        fluxnet(),
+        ceres_ebaf(),
+        arm_sites(),
+        // ---- Fire ----
+        mtbs(),
+        viirs_active_fire(),
+        ravg(),
+        // ---- Ecology / Vegetation ----
+        modis_lai(),
+        modis_et(),
+    ];
+    // Remaining datasets pushed individually below
     ds.push(modis_ndvi());
     ds.push(gedi_canopy());
     ds.push(fia_plots());

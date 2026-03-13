@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "MAESMA: Modular Agentic Earth System Model Architecture"
+abstract: >-
+  An agentic AI system that autonomously discovers, assembles, benchmarks,
+  selects, and invents Earth system model configurations. A 30-agent swarm
+  reasons over a versioned Process Knowledgebase via a neural inference
+  engine, proposing process selections driven by simulation errors and
+  uncertainties. Process models are treated as living organisms governed by
+  artificial life principles — competing for compute, earning survival
+  through predictive skill, and reproducing via mutation and crossover.
+type: software
+license: Apache-2.0
+repository-code: "https://github.com/admercs/MAESMA"
+keywords:
+  - earth-system-model
+  - agentic-ai
+  - autonomous-modeling
+  - process-discovery
+  - artificial-life
+  - knowledgebase
+  - neural-inference
+  - multi-agent-system
+  - climate-science
+  - geoengineering
+  - planetary-defense
+  - rust
+authors:
+  - family-names: Mercs
+    given-names: Adam
+    affiliation: Nervosys

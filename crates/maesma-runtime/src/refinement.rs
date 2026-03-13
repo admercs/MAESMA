@@ -389,7 +389,7 @@ fn fire_disturbance_mods(event: &DisturbanceEvent) -> Vec<StateModification> {
 
 fn flood_disturbance_mods(event: &DisturbanceEvent) -> Vec<StateModification> {
     // Floods saturate soil
-    let sat_vals: Vec<f64> = event.severity.iter().map(|s| *s).collect();
+    let sat_vals: Vec<f64> = event.severity.to_vec();
     vec![StateModification {
         field: "soil_moisture".into(),
         cells: event.affected_cells.clone(),

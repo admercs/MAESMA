@@ -216,7 +216,7 @@ pub fn extract_for_method(
             extractor
                 .extract_multi(field, stations)
                 .into_iter()
-                .filter_map(|v| v)
+                .flatten()
                 .collect()
         }
         ExtractionMethod::SpatialAverage | ExtractionMethod::AreaWeighted => {

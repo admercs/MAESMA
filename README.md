@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/typst-paper-purple.svg" alt="Typst">
 </p>
 
-MAESMA is an agentic AI system that autonomously discovers, assembles, benchmarks, selects, and invents Earth system model configurations. At its center lies a versioned **Process Knowledgebase** — the single store of all process models, manifests, ontological metadata, and skill records. A 25-agent swarm reasons over this knowledgebase via a **neural inference engine** (graph transformer), proposing process selections driven by simulation errors and uncertainties. Process models are treated as **living organisms**: they compete for compute, earn survival through predictive skill, replicate via mutation and crossover, and face extinction when stagnant — an artificial life framework for autonomous model construction.
+MAESMA is an agentic AI system that autonomously discovers, assembles, benchmarks, selects, and invents Earth system model configurations. At its center lies a versioned **Process Knowledgebase** — the single store of all process models, manifests, ontological metadata, and skill records. A 30-agent swarm reasons over this knowledgebase via a **neural inference engine** (graph transformer), proposing process selections driven by simulation errors and uncertainties. Process models are treated as **living organisms**: they compete for compute, earn survival through predictive skill, replicate via mutation and crossover, and face extinction when stagnant — an artificial life framework for autonomous model construction.
 
 ## Key Ideas
 
@@ -140,7 +140,7 @@ All layers run concurrently and continuously. The strategic loop never terminate
 │                                    │ proposals                           │
 │                                    ▼                                     │
 │  ┌─────────────┐    ┌──────────────────────────────┐    ┌─────────────┐ │
-│  │   PROCESS   │◄───┤       AGENT SWARM (25)       ├───►│  SIMULATION │ │
+│  │   PROCESS   │◄───┤       AGENT SWARM (30)       ├───►│  SIMULATION │ │
 │  │  DISCOVERY  │    │                              │    │   RUNTIME   │ │
 │  │  PIPELINE   │    │  Assemble, compile, execute, │    │             │ │
 │  │             │    │  benchmark, score, calibrate  │    │  Multi-GPU  │ │
@@ -347,7 +347,7 @@ A continuous background daemon (`HeartbeatDaemon`) ticks through all living proc
 
 ## Agent Swarm
 
-25 agents own the full model lifecycle:
+30 agents own the full model lifecycle:
 
 | Agent                          | Role                                                                |
 | ------------------------------ | ------------------------------------------------------------------- |
@@ -376,6 +376,11 @@ A continuous background daemon (`HeartbeatDaemon`) ticks through all living proc
 | **Foundation Model**           | Orchestrate Earth-2 foundation model ensemble; bias-correct; fuse   |
 | **Autonomous Observation**     | Edge AI observation tasking; anomaly detection; adaptive scheduling |
 | **Process Evolution**          | ALife-driven population management; survival tiers; replication     |
+| **Hypothesis Engine**          | Structured enumeration, factorial experiments, budget-aware trials  |
+| **Meta-Learner**               | Transfer learning across regions; few-shot generalization           |
+| **Regime Detector**            | Cluster skill records to discover and map dynamical regimes         |
+| **Salient Dynamics**           | Rank processes by impact on state evolution; prioritize upgrades    |
+| **Scale Negotiator**           | Resolve dx/dt conflicts across coupled families; insert remapping   |
 
 ## Neural Inference & Knowledge Engine
 
@@ -742,10 +747,10 @@ Embedded domains allocate scratch on GPU; transfer only boundaries and summarize
 crates/
   maesma-core/          # Domain types, traits, invariants (ProcessRunner, SAPG, ontology, ALife)
   maesma-knowledgebase/ # SQLite-backed KB with BLAKE3 content-addressing; seed manifests + relations
-  maesma-agents/        # 25 agent implementations behind async Agent trait
+  maesma-agents/        # 30 agent implementations behind async Agent trait
   maesma-compiler/      # SAPG conservation closure, scale compatibility, coupling validation
   maesma-runtime/       # Simulation execution engine: scheduler, event bus, health monitor
-  maesma-processes/     # 13 process family modules implementing ProcessRunner
+  maesma-processes/     # 13 process family modules with R0-R1 fidelity rungs
   maesma-inference/     # Neural inference abstraction (graph transformer trait)
   maesma-federation/    # A2A federation client (peer discovery, trust, artifact exchange)
   maesma-api/           # Axum REST + WebSocket server (12 endpoints)

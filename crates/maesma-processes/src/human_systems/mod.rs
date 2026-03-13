@@ -97,8 +97,8 @@ impl LandUseChange {
         let n = self.num_classes;
         let mut new_frac = vec![0.0f64; n];
 
-        for i in 0..n {
-            for j in 0..n {
+        for (i, new_frac_i) in new_frac.iter_mut().enumerate() {
+            for (j, &frac_j) in fractions.iter().enumerate() {
                 let mut tij = self.transition_matrix[i * n + j];
 
                 // Modulate: high population pushes towards urban/cropland
@@ -114,7 +114,7 @@ impl LandUseChange {
                     tij *= (1.0 - policy * 0.9).max(0.0);
                 }
 
-                new_frac[i] += tij * fractions[j];
+                *new_frac_i += tij * frac_j;
             }
         }
 
@@ -212,11 +212,11 @@ impl ProcessRunner for LandUseChange {
         }
 
         // Write outputs
-        if let Some(f) = state.get_field_mut("land_use_fractions") {
-            if let Some(sl) = f.as_slice_mut() {
-                for (o, v) in sl.iter_mut().zip(new_fracs.iter()) {
-                    *o = *v;
-                }
+        if let Some(f) = state.get_field_mut("land_use_fractions")
+            && let Some(sl) = f.as_slice_mut()
+        {
+            for (o, v) in sl.iter_mut().zip(new_fracs.iter()) {
+                *o = *v;
             }
         }
         macro_rules! write_field {
