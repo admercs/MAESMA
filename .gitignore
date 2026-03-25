@@ -11,6 +11,7 @@ out/
 
 # Build outputs
 *.pdf
+!paper/paper.pdf
 
 # OS files
 .DS_Store
