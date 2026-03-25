@@ -344,3 +344,79 @@ pub struct ClosureReport {
     pub unsatisfied_inputs: Vec<String>,
     pub unused_outputs: Vec<String>,
 }
+
+/// Result of an inquiry-driven knowledgebase search.
+#[derive(Debug, Clone)]
+pub struct InquirySearchResult {
+    /// Manifests matching the requested families and rungs.
+    pub manifests: Vec<ProcessManifest>,
+    /// Number of families with at least one manifest.
+    pub families_covered: usize,
+}
+
+impl KnowledgebaseStore {
+    /// Search for manifests matching a set of (family, rung) pairs.
+    ///
+    /// For each pair, returns all manifests at that family and rung.
+    /// If a requested rung has no manifests, falls back to the nearest
+    /// available rung.
+    pub fn search_for_inquiry(
+        &self,
+        requirements: &[(maesma_core::ProcessFamily, maesma_core::FidelityRung)],
+    ) -> maesma_core::Result<InquirySearchResult> {
+        let all = self.all_manifests()?;
+        let mut matched = Vec::new();
+        let mut families_seen = std::collections::HashSet::new();
+
+        for (family, rung) in requirements {
+            // Try exact match first
+            let mut exact: Vec<&ProcessManifest> = all
+                .iter()
+                .filter(|m| m.family == *family && m.rung == *rung)
+                .collect();
+
+            if exact.is_empty() {
+                // Fall back: find closest rung in the same family
+                let rung_order = [
+                    maesma_core::FidelityRung::R0,
+                    maesma_core::FidelityRung::R1,
+                    maesma_core::FidelityRung::R2,
+                    maesma_core::FidelityRung::R3,
+                ];
+                let target_idx = rung_order.iter().position(|r| r == rung).unwrap_or(0);
+
+                // Search outward from the target rung
+                for offset in 1..=3 {
+                    if exact.is_empty() {
+                        if target_idx >= offset {
+                            exact = all
+                                .iter()
+                                .filter(|m| {
+                                    m.family == *family && m.rung == rung_order[target_idx - offset]
+                                })
+                                .collect();
+                        }
+                    }
+                    if exact.is_empty() && target_idx + offset < rung_order.len() {
+                        exact = all
+                            .iter()
+                            .filter(|m| {
+                                m.family == *family && m.rung == rung_order[target_idx + offset]
+                            })
+                            .collect();
+                    }
+                }
+            }
+
+            for m in exact {
+                families_seen.insert(m.family);
+                matched.push(m.clone());
+            }
+        }
+
+        Ok(InquirySearchResult {
+            manifests: matched,
+            families_covered: families_seen.len(),
+        })
+    }
+}

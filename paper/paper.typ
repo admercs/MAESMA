@@ -5,7 +5,7 @@
 #let paper-subtitle = "Agentic AI for Autonomous Earth System Observation, Model Discovery, and Simulation"
 #let paper-title = paper-short-title + ": " + paper-subtitle
 #let paper-author = "Adam Erickson"
-#let paper-affiliation = "NERVOSYS"
+#let paper-affiliation = "NERVOSYS AI"
 #let paper-email = "opensource@nervosys.ai"
 #let paper-date = datetime(year: 2026, month: 2, day: 19)
 
@@ -64,19 +64,25 @@
   v(0.3em)
 }
 
+#set figure(gap: 1em)
+#show figure: set block(breakable: true)
+#set table(stroke: 0.5pt)
+
 // --- Title Block (arXiv / LaTeX article style) ---
 
 #align(center)[
   #v(0.5in)
   #text(size: 17pt, weight: "bold")[#paper-title]
   #v(1.5em)
-  #text(size: 12pt)[#paper-author]
+  #text(size: 12pt)[#paper-author#super[\*]]
   #v(0.3em)
-  #text(size: 10pt, style: "italic")[#paper-affiliation]
+  #text(size: 10pt)[#paper-affiliation]
   #v(0.2em)
   #text(size: 10pt)[#raw(paper-email)]
   #v(0.5em)
   #text(size: 10pt)[#paper-date.display("[month repr:long] [day], [year]")]
+  #v(1em)
+  #text(size: 9pt)[\*This work accelerated by NERVOSYS Autoresearch]
   #v(1.5em)
 ]
 
@@ -306,6 +312,21 @@ MAESMA deploys 25 specialized agents organized across its three control layers. 
 
 *A2A Gateway Agent.* Manages inter-institutional federation: peer discovery via Agent Cards, task lifecycle management, artifact exchange (IR fragments, skill records, manifests), and authentication.
 
+=== Inquiry-Driven Selection
+
+A distinguishing capability of MAESMA is _inquiry-driven selection_: the system automatically identifies the appropriate process families, fidelity rungs, and observation datasets needed to answer a specific user question. Rather than requiring manual configuration of which models and data sources to employ, the user submits a natural-language inquiry (e.g., "How will wildfire frequency change soil erosion rates in the Pacific Northwest under RCP 8.5?") and the agent swarm produces a complete execution plan.
+
+The *Intent & Scope Agent* drives this pipeline through four stages:
+
+#set par(first-line-indent: 0em)
++ *Family identification.* A keyword-driven analysis maps the inquiry text to relevant process families from the 13-family taxonomy. Keywords carry strength weights (strong or weak association), and the agent scores each family by its cumulative keyword overlap with the question. For the wildfire--erosion example, Fire and Geomorphology are identified as primary families.
++ *Coupling propagation.* A dependency graph encodes known inter-family coupling requirements (e.g., Fire $arrow.r$ Ecology, Fire $arrow.r$ Atmosphere, Geomorphology $arrow.r$ Hydrology). Supporting families reachable from the primary set are automatically included, ensuring that essential feedbacks are not omitted.
++ *Budget-aware fidelity assignment.* The user may specify a computational budget tier (low, medium, high, or unlimited). Primary families receive the maximum fidelity rung permitted by the budget; supporting families receive a default (typically one rung lower). This produces a per-family fidelity map without requiring the user to understand the rung taxonomy.
++ *Dataset recommendation.* The agent matches inquiry keywords against a catalog of 28+ observation dataset mappings (e.g., "streamflow" $arrow.r$ USGS NWIS, "soil moisture" $arrow.r$ SMAP L3, "burned area" $arrow.r$ MODIS MCD64A1). Each recommended dataset carries a relevance score. Fallback defaults per family ensure that at least one validation dataset is always suggested.
+#set par(first-line-indent: 1.5em)
+
+The resulting `InquiryPlan` is enriched by querying the knowledgebase for concrete `ProcessManifest` entries matching the recommended family--rung pairs, with automatic fallback to the nearest available rung when an exact match is absent. The plan is exposed through both a REST endpoint (`POST /api/v1/inquiry`) and a CLI subcommand (`maesma inquiry`), enabling programmatic and interactive use.
+
 // ============================================================================
 = Autonomous Optimization Loop
 // ============================================================================
@@ -510,7 +531,7 @@ Inter-institutional collaboration is achieved via the Agent-to-Agent (A2A) feder
   stroke: 0.5pt + luma(220),
   width: 100%,
 )[
-  #set text(size: 8.5pt, font: "Cascadia Code")
+  #set text(size: 8.5pt)
   ```json
   {
     "name": "maesma-land-fire-pnw",
@@ -579,7 +600,7 @@ The `ProcessRunner` trait is the central contract that all process implementatio
   stroke: 0.5pt + luma(220),
   width: 100%,
 )[
-  #set text(size: 8.5pt, font: "Cascadia Code")
+  #set text(size: 8.5pt)
   ```rust
   pub trait ProcessRunner: Send + Sync {
       fn id(&self) -> ProcessId;
@@ -659,23 +680,23 @@ Several threads of prior work converge in the MAESMA design. We survey the most 
 
 == Earth System Model Construction
 
-Community models such as CESM (Hurrell et al., 2013), E3SM (Golaz et al., 2019), and GFDL-ESM4 (Dunne et al., 2020) have established component-coupling frameworks (CIME, MCT, MOAB) that allow researchers to swap atmosphere, ocean, land, and ice components. MAESMA extends this paradigm from _human-selected component sets_ to _agent-discovered process sets_ at arbitrary fidelity, with the knowledgebase replacing static configuration files. Modular process-based models in fire (FATES, Prometheus), hydrology (ParFlow, VIC, Noah-MP), and ecology (LPJ-GUESS, iLand) provide many of the initial knowledgebase entries, but in MAESMA these are first-class automata competing for survival rather than fixed components.
+Community models such as CESM @hurrell-2013, E3SM @golaz-2019, and GFDL-ESM4 @dunne-2020 have established component-coupling frameworks (CIME, MCT, MOAB) that allow researchers to swap atmosphere, ocean, land, and ice components. MAESMA extends this paradigm from _human-selected component sets_ to _agent-discovered process sets_ at arbitrary fidelity, with the knowledgebase replacing static configuration files. Modular process-based models in fire (FATES @fisher-2018, Prometheus), hydrology (ParFlow @kollet-2006, VIC @liang-1994, Noah-MP @niu-2011), and ecology (LPJ-GUESS @smith-2001, iLand @seidl-2012) provide many of the initial knowledgebase entries, but in MAESMA these are first-class automata competing for survival rather than fixed components.
 
 == AI for Scientific Discovery
 
-Neural operator surrogates --- Fourier Neural Operators (Li et al., 2021), Physics-Informed Neural Operators (Li et al., 2023), DeepONet (Lu et al., 2021), and MeshGraphNet (Pfaff et al., 2021) --- have demonstrated order-of-magnitude speedups for PDE-governed dynamics. Foundation weather models (Pangu-Weather, FourCastNet, GraphCast, GenCast) push this further. MAESMA treats these as fidelity rungs within the process representation ladder; an agent selects them when atmospheric dynamics are not salient, freeing GPU budget for other families. Unlike standalone emulator projects, MAESMA embeds learned surrogates into a full-stack ESM where they must satisfy conservation, coupling, and double-counting constraints.
+Neural operator surrogates --- Fourier Neural Operators @li-2021-fno, Physics-Informed Neural Operators @li-2023-pino, DeepONet @lu-2021, and MeshGraphNet @pfaff-2021 --- have demonstrated order-of-magnitude speedups for PDE-governed dynamics. Foundation weather models (Pangu-Weather @bi-2023, FourCastNet @pathak-2022, GraphCast @lam-2023, GenCast @price-2024) push this further. MAESMA treats these as fidelity rungs within the process representation ladder; an agent selects them when atmospheric dynamics are not salient, freeing GPU budget for other families. Unlike standalone emulator projects, MAESMA embeds learned surrogates into a full-stack ESM where they must satisfy conservation, coupling, and double-counting constraints.
 
 == Multi-Agent Scientific Workflows
 
-Agentic AI frameworks (AutoGPT, MetaGPT, CAMEL) have explored LLM-based multi-agent collaboration, but typically for software engineering or question-answering. Scientific multi-agent systems are rarer: IBM's SciAgents (Ghafarollahi et al., 2024) uses multi-agent reasoning for materials design, while ChemCrow (Bran et al., 2024) deploys tool-augmented agents for chemistry. MAESMA differs in that agents operate over a _structured knowledgebase_ with typed manifests and formal validation constraints rather than free-form text, and in that the agent swarm is permanent --- running indefinitely, accumulating knowledge, and never resetting context.
+Agentic AI frameworks (AutoGPT, MetaGPT, CAMEL) have explored LLM-based multi-agent collaboration, but typically for software engineering or question-answering. Scientific multi-agent systems are rarer: IBM's SciAgents @ghafarollahi-2024 uses multi-agent reasoning for materials design, while ChemCrow @bran-2024 deploys tool-augmented agents for chemistry. MAESMA differs in that agents operate over a _structured knowledgebase_ with typed manifests and formal validation constraints rather than free-form text, and in that the agent swarm is permanent --- running indefinitely, accumulating knowledge, and never resetting context.
 
 == AutoML and Neural Architecture Search
 
-AutoML (Hutter et al., 2019) and neural architecture search (Zoph and Le, 2017) automate model selection and hyperparameter tuning. MAESMA's optimization loop is structurally similar but operates at a coarser grain --- swapping entire process representations (ODE systems, empirical closures, neural surrogates) rather than individual layers --- and adds physics-informed constraints (conservation, closure, double-counting) absent from standard AutoML. The Pareto-based selection across accuracy, cost, and conservation dimensions extends multi-objective NAS (Lu et al., 2019) to scientific simulation.
+AutoML @hutter-2019 and neural architecture search @zoph-2017 automate model selection and hyperparameter tuning. MAESMA's optimization loop is structurally similar but operates at a coarser grain --- swapping entire process representations (ODE systems, empirical closures, neural surrogates) rather than individual layers --- and adds physics-informed constraints (conservation, closure, double-counting) absent from standard AutoML. The Pareto-based selection across accuracy, cost, and conservation dimensions extends multi-objective NAS @lu-2019-nas to scientific simulation.
 
 == Artificial Life and Evolutionary Computation
 
-MAESMA's ALife framework draws on open-ended evolution (Stanley and Lehman, 2019), artificial ecologies (Ray, 1991), and quality-diversity algorithms (Pugh et al., 2016). Treating process representations as organisms subject to birth, death, mutation, and crossover is closest in spirit to the Tierra system (Ray, 1991) and Avida (Ofria and Wilke, 2004), but applied to scientific model components rather than self-replicating programs. The constitutional invariants (conservation, thermodynamic consistency, dimensional correctness) serve as hard constraints that evolutionary operators must preserve, analogous to the physical laws of an artificial chemistry.
+MAESMA's ALife framework draws on open-ended evolution @stanley-2019, artificial ecologies @ray-1991, and quality-diversity algorithms @pugh-2016. Treating process representations as organisms subject to birth, death, mutation, and crossover is closest in spirit to the Tierra system @ray-1991 and Avida @ofria-2004, but applied to scientific model components rather than self-replicating programs. The constitutional invariants (conservation, thermodynamic consistency, dimensional correctness) serve as hard constraints that evolutionary operators must preserve, analogous to the physical laws of an artificial chemistry.
 
 // ============================================================================
 = Discussion

@@ -83,28 +83,28 @@ cd dashboard && npm install && npm run dev
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                      STRATEGIC LAYER (hours–weeks)                     │
+│                      STRATEGIC LAYER (hours–weeks)                      │
 │                                                                         │
-│  Intent & Scope ──► Autonomous Optimizer ──► Model Selection           │
+│  Intent & Scope ──► Autonomous Optimizer ──► Model Selection            │
 │       │                    │                       │                    │
 │       │    ┌───────────────┘                       │                    │
 │       ▼    ▼                                       ▼                    │
 │  ┌──────────────────────────────────────────────────────────┐           │
 │  │           TACTICAL LAYER (minutes–hours)                 │           │
 │  │                                                          │           │
-│  │  KB Retrieval ──────► Model Assembly ──► Benchmarking  │           │
+│  │  KB Retrieval ──────► Model Assembly ──► Benchmarking    │           │
 │  │       │                      │                  │        │           │
-│  │  Active Learning ◄───── Closure Check ──── Skill Librarian          │
+│  │  Active Learning ◄───── Closure Check ──── Skill Librarian           │
 │  │       │                      │                  │        │           │
-│  │  Process Discovery ◄── Data Scout ◄──── EESM Diagnostics│           │
+│  │  Process Discovery ◄── Data Scout ◄──── EESM Diagnostics │           │
 │  └──────────────────────────────────────────────────────────┘           │
 │       │                    │                       │                    │
 │       ▼                    ▼                       ▼                    │
 │  ┌──────────────────────────────────────────────────────────┐           │
-│  │            OPERATIONAL LAYER (seconds–minutes)            │           │
+│  │            OPERATIONAL LAYER (seconds–minutes)           │           │
 │  │                                                          │           │
 │  │  Runtime Sentinel ──► Compiler ──► Task Scheduler        │           │
-│  │       │                  │              │                 │           │
+│  │       │                  │              │                │           │
 │  │  Data Plane Agents ◄─── Event Bus ◄─── Device Manager    │           │
 │  └──────────────────────────────────────────────────────────┘           │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -118,8 +118,8 @@ All layers run concurrently and continuously. The strategic loop never terminate
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                    KNOWLEDGEBASE-CENTRIC ARCHITECTURE                    │
 │                                                                          │
-│  Observations ──►  ┌──────────────────────────────┐  ◄── Discovered     │
-│  (STAC/CMR/NRT)    │     PROCESS KNOWLEDGEBASE     │      Processes      │
+│  Observations ──►   ┌──────────────────────────────┐  ◄── Discovered     │
+│  (STAC/CMR/NRT)     │     PROCESS KNOWLEDGEBASE    │      Processes      │
 │                     │                              │                     │
 │                     │  Process code + manifests    │                     │
 │                     │  Ontology graph (5 domains)  │                     │
@@ -129,7 +129,7 @@ All layers run concurrently and continuously. The strategic loop never terminate
 │                                    │ query                               │
 │                                    ▼                                     │
 │                     ┌──────────────────────────────┐                     │
-│                     │    NEURAL INFERENCE ENGINE    │                     │
+│                     │    NEURAL INFERENCE ENGINE   │                     │
 │                     │                              │                     │
 │                     │  Graph transformer over KB   │                     │
 │                     │  Inputs: errors, uncertainty,│                     │
@@ -139,17 +139,17 @@ All layers run concurrently and continuously. The strategic loop never terminate
 │                     └──────────────┬───────────────┘                     │
 │                                    │ proposals                           │
 │                                    ▼                                     │
-│  ┌─────────────┐    ┌──────────────────────────────┐    ┌─────────────┐ │
-│  │   PROCESS   │◄───┤       AGENT SWARM (30)       ├───►│  SIMULATION │ │
-│  │  DISCOVERY  │    │                              │    │   RUNTIME   │ │
-│  │  PIPELINE   │    │  Assemble, compile, execute, │    │             │ │
-│  │             │    │  benchmark, score, calibrate  │    │  Multi-GPU  │ │
-│  │  Residual → │    └──────────────────────────────┘    │  execution  │ │
-│  │  Learn →    │                                        └──────┬──────┘ │
-│  │  Validate → │                                               │        │
-│  │  Deposit    │    ┌──────────────────────────────┐           │        │
-│  │  into KB    │◄───┤    ERRORS & UNCERTAINTIES     │◄──────────┘        │
-│  └─────────────┘    │  (drive next inference cycle) │                    │
+│  ┌─────────────┐    ┌──────────────────────────────┐    ┌─────────────┐  │
+│  │   PROCESS   │◄───┤       AGENT SWARM (30)       ├───►│  SIMULATION │  │
+│  │  DISCOVERY  │    │                              │    │   RUNTIME   │  │
+│  │  PIPELINE   │    │  Assemble, compile, execute, │    │             │  │
+│  │             │    │  benchmark, score, calibrate │    │  Multi-GPU  │  │
+│  │  Residual → │    └──────────────────────────────┘    │  execution  │  │
+│  │  Learn →    │                                        └──────┬──────┘  │
+│  │  Validate → │                                               │         │
+│  │  Deposit    │    ┌──────────────────────────────┐           │         │
+│  │  into KB    │◄───┤    ERRORS & UNCERTAINTIES    │◄──────────┘         │
+│  └─────────────┘    │ (drive next inference cycle) │                     │
 │                     └──────────────────────────────┘                     │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
@@ -160,17 +160,17 @@ The Process Knowledgebase is the gravitational center of the architecture. All a
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                    AUTONOMOUS CLOSED LOOP (runs indefinitely)               │
+│                    AUTONOMOUS CLOSED LOOP (runs indefinitely)                │
 │                                                                              │
-│     ┌────────────┐     ┌────────────┐     ┌────────────┐     ┌──────────┐   │
+│     ┌───────────-─┐     ┌────────────┐     ┌────────────┐     ┌──────────┐   │
 │     │ 1. DISCOVER │────►│ 2. ASSEMBLE│────►│ 3. BENCHMARK────►│ 4. SELECT│   │
 │     │    DATA     │     │   MODELS   │     │   & SCORE  │     │  OPTIMAL │   │
 │     └─────▲───────┘     └────────────┘     └────────────┘     └────┬─────┘   │
 │           │                                                        │         │
-│           │         ┌──────────────────────────────────┐            │         │
-│           │         │  5. DISCOVER PROCESSES            │◄───────────┘         │
+│           │         ┌──────────────────────────────────┐           │         │
+│           │         │  5. DISCOVER PROCESSES           │◄──────────┘         │
 │           │         │     Residual → learn → validate  │                     │
-│           │         │     → deposit into Knowledgebase  │                     │
+│           │         │     → deposit into Knowledgebase │                     │
 │           │         └──────────────┬───────────────────┘                     │
 │           │                        │                                         │
 │     ┌─────┴────────────────────────┘                                         │
@@ -178,8 +178,8 @@ The Process Knowledgebase is the gravitational center of the architecture. All a
 │     └──────────────────── repeat forever ────────────────────────────────────┘
 │                                                                              │
 │  ┌────────────────────────────────────────────────────────────────────────┐  │
-│  │  MONITORING PLANE: Next.js dashboard (observe-only, never blocks)     │  │
-│  │  Optional: humans adjust objectives/weights/budgets at any time       │  │
+│  │  MONITORING PLANE: Next.js dashboard (observe-only, never blocks)      │  │
+│  │  Optional: humans adjust objectives/weights/budgets at any time        │  │
 │  └────────────────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -449,21 +449,21 @@ Every discovered representation carries epistemic provenance: training data fing
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                   GEOENGINEERING FEEDBACK CONTROL LOOP                       │
 │                                                                              │
-│   SETPOINTS                    PLANT                      OBSERVATIONS      │
-│   ┌──────────────────┐        ┌──────────────────┐        ┌──────────────┐  │
-│   │ T_global ≤ 1.5°C │        │                  │        │ Satellite    │  │
-│   │ ΔP_regional < 5% │───►    │  MAESMA coupled   │───────►│ In-situ     │  │
-│   │ pH_ocean > 8.0    │  ┌──► │  ESM simulation  │        │ Reanalysis  │  │
-│   │ RF_target = W/m²  │  │    │                  │        │              │  │
-│   └──────────────────┘  │    └──────────────────┘        └──────┬───────┘  │
-│                          │                                       │           │
-│   ACTUATORS              │    CONTROLLER                         │           │
-│   ┌──────────────────┐  │    ┌──────────────────────────────────┴────────┐  │
-│   │ SAI, MCB, OAE,   │  │    │  Geoengineering Strategy Agent            │  │
-│   │ DAC, SRM, cloud  │◄─┤    │  Error → predict → optimize → simulate  │  │
-│   │ seeding, enhanced│  │    │  → verify → update strategy → repeat     │  │
-│   │ weathering, gene │  │    └─────────────────────────────────────────┘  │
-│   │ mod, afforestation│◄─┘                                                   │
+│   SETPOINTS                    PLANT                      OBSERVATIONS       │
+│   ┌──────────────────┐       ┌──────────────────┐        ┌──────────────┐    │
+│   │ T_global ≤ 1.5°C │       │                  │        │ Satellite    │    │
+│   │ ΔP_regional < 5% │───►   │  MAESMA coupled  │───────►│ In-situ      │    │
+│   │ pH_ocean > 8.0   │  ┌──► │  ESM simulation  │        │ Reanalysis   │    │
+│   │ RF_target = W/m² │  │    │                  │        │              │    │
+│   └──────────────────┘  │    └──────────────────┘        └──────┬───────┘    │
+│                         │                                       │            │
+│   ACTUATORS             │    CONTROLLER                         │            │
+│   ┌──────────────────┐  │    ┌──────────────────────────────────┴────────┐   │
+│   │ SAI, MCB, OAE,   │  │    │  Geoengineering Strategy Agent            │   │
+│   │ DAC, SRM, cloud  │◄─┤    │  Error → predict → optimize → simulate    │   │
+│   │ seeding, enhanced│  │    │  → verify → update strategy → repeat      │   │
+│   │ weathering, gene │  │    └───────────────────────────────────────────┘   │
+│   │ afforestation    │◄─┘                                                    │
 │   └──────────────────┘                                                       │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -625,15 +625,15 @@ EXTINCTION TRIGGER
 ┌──────────────────────────────────────────────────────────────────────┐
 │                       A2A FEDERATION LAYER                           │
 │                                                                      │
-│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐             │
-│  │  MAESMA       │   │  MAESMA       │   │  External     │            │
-│  │  Instance A   │◄─►│  Instance B   │◄─►│  Agent        │            │
-│  │  (Land/Fire)  │   │  (Ocean/Ice)  │   │  (IAM/Econ)   │            │
-│  └──────┬───────┘   └──────┬───────┘   └──────┬───────┘             │
-│         │                  │                   │                      │
-│         ▼                  ▼                   ▼                      │
+│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐              │
+│  │  MAESMA      │   │  MAESMA      │   │  External    │              │
+│  │  Instance A  │◄─►│  Instance B  │◄─►│  Agent       │              │
+│  │  (Land/Fire) │   │  (Ocean/Ice) │   │  (IAM/Econ)  │              │
+│  └──────┬───────┘   └──────┬───────┘   └──────┬───────┘              │
+│         │                  │                   │                     │
+│         ▼                  ▼                   ▼                     │
 │  ┌─────────────────────────────────────────────────────────┐         │
-│  │              A2A Gateway Agent                           │         │
+│  │              A2A Gateway Agent                          │         │
 │  │  • Agent Card registry (publish + discover)             │         │
 │  │  • Task lifecycle (submitted → working → completed)     │         │
 │  │  • Artifact exchange (IR, skill records, manifests)     │         │
@@ -743,7 +743,7 @@ Embedded domains allocate scratch on GPU; transfer only boundaries and summarize
 
 ## Project Structure
 
-```text
+```shell
 crates/
   maesma-core/          # Domain types, traits, invariants (ProcessRunner, SAPG, ontology, ALife)
   maesma-knowledgebase/ # SQLite-backed KB with BLAKE3 content-addressing; seed manifests + relations

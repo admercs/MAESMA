@@ -67,6 +67,24 @@ enum Commands {
         port: u16,
     },
 
+    /// Analyze a user inquiry to automatically select datasets and fidelity levels.
+    Inquiry {
+        /// The natural-language question or objective.
+        question: String,
+
+        /// Computational budget: low, medium, high, unlimited.
+        #[arg(short, long, default_value = "medium")]
+        budget: String,
+
+        /// Optional spatial region filter.
+        #[arg(short, long)]
+        region: Option<String>,
+
+        /// Optional temporal scope (e.g., "2000-2020").
+        #[arg(short, long)]
+        temporal_scope: Option<String>,
+    },
+
     /// Show system info.
     Info,
 }
@@ -294,6 +312,109 @@ async fn main() -> anyhow::Result<()> {
             println!("Starting MAESMA API server on {addr}");
             let listener = tokio::net::TcpListener::bind(&addr).await?;
             axum::serve(listener, app).await?;
+        }
+
+        Commands::Inquiry {
+            question,
+            budget,
+            region,
+            temporal_scope,
+        } => {
+            let budget_constraint = match budget.as_str() {
+                "low" => maesma_core::BudgetConstraint::Low,
+                "high" => maesma_core::BudgetConstraint::High,
+                "unlimited" => maesma_core::BudgetConstraint::Unlimited,
+                _ => maesma_core::BudgetConstraint::Medium,
+            };
+
+            let inquiry = maesma_core::Inquiry {
+                question: question.clone(),
+                region,
+                temporal_scope,
+                budget: budget_constraint,
+            };
+
+            println!("Analyzing inquiry: \"{question}\"\n");
+            let mut plan = maesma_agents::intent_scope::IntentScopeAgent::analyze_inquiry(&inquiry);
+
+            // Enrich with knowledgebase manifests if available
+            if let Ok(kb) = maesma_knowledgebase::KnowledgebaseStore::open(&cli.db) {
+                let requirements: Vec<(maesma_core::ProcessFamily, maesma_core::FidelityRung)> =
+                    plan.fidelity_map
+                        .iter()
+                        .map(|fr| (fr.family, fr.recommended_rung))
+                        .collect();
+
+                if let Ok(result) = kb.search_for_inquiry(&requirements) {
+                    plan.manifests = result
+                        .manifests
+                        .iter()
+                        .map(|m| maesma_core::ManifestMatch {
+                            manifest_id: m.id.to_string(),
+                            name: m.name.clone(),
+                            family: m.family,
+                            rung: m.rung,
+                            relevance_score: if plan.primary_families.contains(&m.family) {
+                                0.9
+                            } else {
+                                0.6
+                            },
+                        })
+                        .collect();
+                }
+            }
+
+            // Print the plan
+            println!("─── Inquiry Plan ───────────────────────────────────");
+            println!("Confidence: {:.0}%\n", plan.confidence * 100.0);
+
+            println!("Primary families:");
+            for fam in &plan.primary_families {
+                println!("  • {}", fam.display_name());
+            }
+            if !plan.supporting_families.is_empty() {
+                println!("\nSupporting families (coupling dependencies):");
+                for fam in &plan.supporting_families {
+                    println!("  • {}", fam.display_name());
+                }
+            }
+
+            println!("\nFidelity recommendations:");
+            for fr in &plan.fidelity_map {
+                let role = if fr.is_primary { "primary" } else { "support" };
+                println!(
+                    "  {:20} → {:?} ({}) [{}]",
+                    fr.family.display_name(),
+                    fr.recommended_rung,
+                    fr.recommended_rung.label(),
+                    role
+                );
+            }
+
+            println!("\nRecommended datasets:");
+            for ds in &plan.datasets {
+                println!(
+                    "  {:20} measures {:20} (relevance: {:.0}%)",
+                    ds.dataset_name,
+                    ds.observable,
+                    ds.relevance_score * 100.0,
+                );
+            }
+
+            if !plan.manifests.is_empty() {
+                println!("\nMatching KB manifests:");
+                for m in &plan.manifests {
+                    println!(
+                        "  {} {:30} {:20} {:?}",
+                        &m.manifest_id[..8],
+                        m.name,
+                        m.family.display_name(),
+                        m.rung,
+                    );
+                }
+            }
+
+            println!("\nRationale: {}", plan.rationale);
         }
 
         Commands::Info => {

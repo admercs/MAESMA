@@ -33,6 +33,8 @@ pub fn app(state: AppState) -> Router {
         // Skills
         .route("/api/v1/skills/{process_id}", get(routes::get_skills))
         .route("/api/v1/skills/pareto", get(routes::pareto_front))
+        // Inquiry-driven selection
+        .route("/api/v1/inquiry", post(routes::analyze_inquiry))
         // Simulation
         .route("/api/v1/simulation/status", get(routes::simulation_status))
         // Federation

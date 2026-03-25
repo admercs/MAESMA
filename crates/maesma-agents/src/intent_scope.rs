@@ -2,9 +2,20 @@
 //!
 //! Parses user objectives into observable requirements, error bands, and
 //! priority tiers.  The output drives the entire downstream assembly pipeline.
+//!
+//! Also performs inquiry-driven selection: given a natural-language question
+//! it identifies relevant process families, recommends fidelity rungs per
+//! family, and suggests observation datasets for validation.
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
+
+use maesma_core::families::ProcessFamily;
+use maesma_core::inquiry::{
+    BudgetConstraint, DatasetRecommendation, FidelityRecommendation, Inquiry, InquiryPlan,
+    coupling_dependencies, dataset_keywords, family_keywords,
+};
 
 use crate::traits::{Agent, AgentContext, AgentId, AgentResult, AgentRole};
 
@@ -147,6 +158,165 @@ impl IntentScopeAgent {
             real_time,
         }
     }
+
+    /// Analyze a user inquiry and produce a full `InquiryPlan` including
+    /// recommended process families, fidelity rungs, and datasets.
+    pub fn analyze_inquiry(inquiry: &Inquiry) -> InquiryPlan {
+        let lower = inquiry.question.to_lowercase();
+        let keywords = family_keywords();
+        let ds_keywords = dataset_keywords();
+        let deps = coupling_dependencies();
+
+        // 1. Identify primary families from keywords
+        let mut primary_set: HashSet<ProcessFamily> = HashSet::new();
+        for kw in &keywords {
+            if lower.contains(kw.keyword) && kw.strong {
+                primary_set.insert(kw.family);
+            }
+        }
+        // If nothing strongly matched, try weak matches
+        if primary_set.is_empty() {
+            for kw in &keywords {
+                if lower.contains(kw.keyword) {
+                    primary_set.insert(kw.family);
+                }
+            }
+        }
+        // Final fallback: Atmosphere + Hydrology
+        if primary_set.is_empty() {
+            primary_set.insert(ProcessFamily::Atmosphere);
+            primary_set.insert(ProcessFamily::Hydrology);
+        }
+
+        // 2. Derive supporting families from coupling dependencies
+        let mut supporting_set: HashSet<ProcessFamily> = HashSet::new();
+        for &(from, to) in &deps {
+            if primary_set.contains(&from) && !primary_set.contains(&to) {
+                supporting_set.insert(to);
+            }
+        }
+
+        // 3. Determine budget
+        let budget = inquiry.budget;
+        let primary_rung = budget.max_rung();
+        let support_rung = budget.default_rung();
+
+        // 4. Build fidelity map
+        let primary_families: Vec<ProcessFamily> = primary_set.iter().copied().collect();
+        let supporting_families: Vec<ProcessFamily> = supporting_set.iter().copied().collect();
+
+        let mut fidelity_map: Vec<FidelityRecommendation> = Vec::new();
+        for &fam in &primary_families {
+            fidelity_map.push(FidelityRecommendation {
+                family: fam,
+                recommended_rung: primary_rung,
+                is_primary: true,
+                reason: format!(
+                    "{} directly relevant to inquiry; using {} for primary families",
+                    fam.display_name(),
+                    primary_rung.label()
+                ),
+            });
+        }
+        for &fam in &supporting_families {
+            fidelity_map.push(FidelityRecommendation {
+                family: fam,
+                recommended_rung: support_rung,
+                is_primary: false,
+                reason: format!(
+                    "{} needed as coupling dependency; using {} for supporting families",
+                    fam.display_name(),
+                    support_rung.label()
+                ),
+            });
+        }
+
+        // 5. Recommend datasets
+        let mut datasets: Vec<DatasetRecommendation> = Vec::new();
+        let mut seen_datasets: HashSet<String> = HashSet::new();
+        for dkw in &ds_keywords {
+            if lower.contains(dkw.keyword) && seen_datasets.insert(dkw.dataset_name.to_string()) {
+                datasets.push(DatasetRecommendation {
+                    dataset_name: dkw.dataset_name.to_string(),
+                    observable: dkw.observable.to_string(),
+                    relevance_score: 0.9,
+                    reason: format!(
+                        "Matches inquiry keyword '{}'; measures {}",
+                        dkw.keyword, dkw.observable
+                    ),
+                });
+            }
+        }
+        // If no direct dataset match, recommend general datasets for primary families
+        if datasets.is_empty() {
+            for &fam in &primary_families {
+                let (ds_name, obs) = match fam {
+                    ProcessFamily::Fire => ("MTBS", "burned_area"),
+                    ProcessFamily::Hydrology => ("USGS_NWIS", "streamflow"),
+                    ProcessFamily::Ecology => ("MODIS_LAI", "lai"),
+                    ProcessFamily::Biogeochemistry => ("FLUXNET", "nee"),
+                    ProcessFamily::Radiation => ("CERES", "radiation"),
+                    ProcessFamily::Atmosphere => ("ERA5", "temperature"),
+                    ProcessFamily::Ocean => ("Argo", "ocean_temperature"),
+                    ProcessFamily::Cryosphere => ("SNODAS", "swe"),
+                    ProcessFamily::Geomorphology => ("USGS_Sediment", "suspended_sediment"),
+                    ProcessFamily::Geology => ("USGS_NWIS", "groundwater_level"),
+                    ProcessFamily::HumanSystems => ("NLCD", "land_cover"),
+                    ProcessFamily::TrophicDynamics => ("GBIF", "species_occurrence"),
+                    ProcessFamily::Evolution => ("GBIF", "species_occurrence"),
+                };
+                if seen_datasets.insert(ds_name.to_string()) {
+                    datasets.push(DatasetRecommendation {
+                        dataset_name: ds_name.to_string(),
+                        observable: obs.to_string(),
+                        relevance_score: 0.6,
+                        reason: format!("Default dataset for {} family", fam.display_name()),
+                    });
+                }
+            }
+        }
+
+        // 6. Rationale
+        let primary_names: Vec<&str> = primary_families.iter().map(|f| f.display_name()).collect();
+        let support_names: Vec<&str> = supporting_families
+            .iter()
+            .map(|f| f.display_name())
+            .collect();
+        let dataset_names: Vec<&str> = datasets.iter().map(|d| d.dataset_name.as_str()).collect();
+
+        let rationale = format!(
+            "Inquiry analysis identified {} primary process families [{}] and {} supporting \
+             families [{}]. Primary families will run at {} fidelity, supporting at {}. \
+             {} observation datasets recommended for validation: [{}].",
+            primary_families.len(),
+            primary_names.join(", "),
+            supporting_families.len(),
+            support_names.join(", "),
+            primary_rung.label(),
+            support_rung.label(),
+            datasets.len(),
+            dataset_names.join(", "),
+        );
+
+        let confidence = if primary_families.len() >= 2 {
+            0.85
+        } else if primary_families.len() == 1 {
+            0.75
+        } else {
+            0.5
+        };
+
+        InquiryPlan {
+            inquiry: inquiry.clone(),
+            primary_families,
+            supporting_families,
+            fidelity_map,
+            datasets,
+            manifests: Vec::new(), // populated later via KB lookup
+            rationale,
+            confidence,
+        }
+    }
 }
 
 impl Default for IntentScopeAgent {
@@ -170,6 +340,54 @@ impl Agent for IntentScopeAgent {
     }
 
     async fn execute(&self, ctx: AgentContext) -> maesma_core::Result<AgentResult> {
+        // If context contains an "inquiry" object, run full inquiry analysis
+        if let Some(question) = ctx.params.get("inquiry").and_then(|v| v.as_str()) {
+            let budget = ctx
+                .params
+                .get("budget")
+                .and_then(|v| v.as_str())
+                .unwrap_or("medium");
+            let budget_constraint = match budget {
+                "low" => BudgetConstraint::Low,
+                "high" => BudgetConstraint::High,
+                "unlimited" => BudgetConstraint::Unlimited,
+                _ => BudgetConstraint::Medium,
+            };
+            let region = ctx
+                .params
+                .get("region")
+                .and_then(|v| v.as_str())
+                .map(String::from);
+            let temporal_scope = ctx
+                .params
+                .get("temporal_scope")
+                .and_then(|v| v.as_str())
+                .map(String::from);
+
+            let inquiry = Inquiry {
+                question: question.to_string(),
+                region,
+                temporal_scope,
+                budget: budget_constraint,
+            };
+            let plan = Self::analyze_inquiry(&inquiry);
+
+            let data = serde_json::to_value(&plan)
+                .map_err(|e| maesma_core::Error::Serialization(e.to_string()))?;
+
+            return Ok(AgentResult::ok(format!(
+                "Inquiry analysis: {} primary families, {} supporting, {} datasets; confidence={:.2}",
+                plan.primary_families.len(),
+                plan.supporting_families.len(),
+                plan.datasets.len(),
+                plan.confidence,
+            ))
+            .with_data(data)
+            .with_next("kb_retrieval")
+            .with_next("assembly"));
+        }
+
+        // Default: parse a simple objective string
         let objective = ctx
             .params
             .get("objective")

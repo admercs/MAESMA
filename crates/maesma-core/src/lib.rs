@@ -13,6 +13,7 @@ pub mod evolution;
 pub mod families;
 pub mod graph;
 pub mod impact;
+pub mod inquiry;
 pub mod manifest;
 pub mod metrics;
 pub mod msd;
@@ -35,6 +36,10 @@ pub use error::{Error, Result};
 pub use evolution::{EvolutionCandidate, EvolutionConfig, Population, ProcessLineage};
 pub use families::ProcessFamily;
 pub use graph::{Sapg, SapgEdgeRecord, SapgSnapshot};
+pub use inquiry::{
+    BudgetConstraint, DatasetRecommendation, FidelityRecommendation, Inquiry, InquiryPlan,
+    ManifestMatch,
+};
 pub use manifest::ProcessManifest;
 pub use observations::{ObservationDataset, ObservationId, ObservationRegistry};
 pub use process::{FidelityRung, ProcessId, ProcessRepresentation};

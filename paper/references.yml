@@ -192,3 +192,134 @@ ofria-2004:
   page-range: 191-229
   doi: "10.1162/106454604773563612"
 
+# ============================================================================
+# Foundation Weather Models
+# ============================================================================
+
+bi-2023:
+  type: article
+  title: "Accurate Medium-Range Global Weather Forecasting with 3D Neural Networks"
+  author: ["Bi, Kaifeng", "Xie, Lingxi", "Zhang, Hengheng", "Chen, Xin", "Gu, Xiaotao", "Tian, Qi"]
+  date: 2023
+  parent:
+    type: periodical
+    title: "Nature"
+  volume: 619
+  page-range: 533-538
+  doi: "10.1038/s41586-023-06185-3"
+
+pathak-2022:
+  type: article
+  title: "FourCastNet: A Global Data-Driven High-Resolution Weather Forecasting Model"
+  author: ["Pathak, Jaideep", "Subramanian, Shashank", "Harrington, Peter", "Raja, Sanjeev", "Chattopadhyay, Ashesh", "Mardani, Morteza", "Kurth, Thorsten", "Hall, David", "Li, Zongyi", "Azizzadenesheli, Kamyar", "Hassanzadeh, Pedram", "Kashinath, Karthik", "Anandkumar, Anima"]
+  date: 2022
+  parent:
+    type: periodical
+    title: "arXiv preprint"
+  serial-number: "arXiv:2202.11214"
+
+lam-2023:
+  type: article
+  title: "Learning Skillful Medium-Range Global Weather Forecasting"
+  author: ["Lam, Remi", "Sanchez-Gonzalez, Alvaro", "Willson, Matthew", "Wirber, Peter", "Fortunato, Meire", "Alet, Ferran", "Ravuri, Suman", "Ewalds, Timo", "Eaton-Rosen, Zach", "Hu, Weihua", "Merose, Alexander", "Hoyer, Stephan", "Holland, George", "Vinyals, Oriol", "Stott, Jacklynn", "Pritzel, Alexander", "Mohamed, Shakir", "Battaglia, Peter"]
+  date: 2023
+  parent:
+    type: periodical
+    title: "Science"
+  volume: 382
+  issue: 6677
+  page-range: 1416-1421
+  doi: "10.1126/science.adi2336"
+
+price-2024:
+  type: article
+  title: "GenCast: Diffusion-Based Ensemble Forecasting for Medium-Range Weather"
+  author: ["Price, Ilan", "Sanchez-Gonzalez, Alvaro", "Alet, Ferran", "Ewalds, Timo", "El-Kadi, Andrew", "Stott, Jacklynn", "Mohamed, Shakir", "Battaglia, Peter", "Lam, Remi", "Willson, Matthew"]
+  date: 2024
+  parent:
+    type: periodical
+    title: "Nature"
+  volume: 637
+  page-range: 1038-1044
+  doi: "10.1038/s41586-024-08252-9"
+
+# ============================================================================
+# Reference Earth System and Process Models
+# ============================================================================
+
+fisher-2018:
+  type: article
+  title: "Vegetation Demographics in Earth System Models: A Review of Progress and Priorities"
+  author: ["Fisher, Rosie A.", "Koven, Charles D.", "Anderegg, William R. L.", "Christoffersen, Bradley O.", "Dietze, Michael C.", "Farrior, Caroline E.", "Holm, Jennifer A.", "Hurtt, George C.", "Knox, Ryan G.", "Lawrence, Peter J.", "Lichstein, Jeremy W.", "Longo, Marcos", "Matheny, Ashley M.", "Medvigy, David", "Muller-Landau, Helene C.", "Powell, Thomas L.", "Serbin, Shawn P.", "Sato, Hisashi", "Shuman, Jacquelyn K.", "Smith, Benjamin", "Trugman, Anna T.", "Viskari, Toni", "Verbeeck, Hans", "Weng, Ensheng", "Xu, Chonggang", "Xu, Xiaodong", "Zhang, Tao", "Moorcroft, Paul R."]
+  date: 2018
+  parent:
+    type: periodical
+    title: "Global Change Biology"
+  volume: 24
+  issue: 1
+  page-range: 35-54
+  doi: "10.1111/gcb.13910"
+
+kollet-2006:
+  type: article
+  title: "Integrated Surface--Groundwater Flow Modeling: A Free-Surface Overland Flow Boundary Condition in a Parallel Groundwater Flow Model"
+  author: ["Kollet, Stefan J.", "Maxwell, Reed M."]
+  date: 2006
+  parent:
+    type: periodical
+    title: "Advances in Water Resources"
+  volume: 29
+  issue: 7
+  page-range: 945-958
+  doi: "10.1016/j.advwatres.2005.08.006"
+
+liang-1994:
+  type: article
+  title: "A Simple Hydrologically Based Model of Land Surface Water and Energy Fluxes for General Circulation Models"
+  author: ["Liang, Xu", "Lettenmaier, Dennis P.", "Wood, Eric F.", "Burges, Stephen J."]
+  date: 1994
+  parent:
+    type: periodical
+    title: "Journal of Geophysical Research: Atmospheres"
+  volume: 99
+  issue: D7
+  page-range: 14415-14428
+  doi: "10.1029/94JD00483"
+
+niu-2011:
+  type: article
+  title: "The Community Noah Land Surface Model with Multiparameterization Options (Noah-MP): 1. Model Description and Evaluation with Local-Scale Measurements"
+  author: ["Niu, Guo-Yue", "Yang, Zong-Liang", "Mitchell, Kenneth E.", "Chen, Fei", "Ek, Michael B.", "Barlage, Michael", "Kumar, Anil", "Manning, Kevin", "Niyogi, Dev", "Rosero, Enrique", "Tewari, Mukul", "Xia, Youlong"]
+  date: 2011
+  parent:
+    type: periodical
+    title: "Journal of Geophysical Research: Atmospheres"
+  volume: 116
+  issue: D12
+  doi: "10.1029/2010JD015139"
+
+smith-2001:
+  type: article
+  title: "Representation of Vegetation Dynamics in the Modelling of Terrestrial Ecosystems: Comparing Two Contrasting Approaches within European Climate Space"
+  author: ["Smith, Benjamin", "Prentice, I. Colin", "Sykes, Martin T."]
+  date: 2001
+  parent:
+    type: periodical
+    title: "Global Ecology and Biogeography"
+  volume: 10
+  issue: 6
+  page-range: 621-637
+  doi: "10.1046/j.1466-822X.2001.00256.x"
+
+seidl-2012:
+  type: article
+  title: "An Individual-Based Process Model to Simulate Landscape-Scale Forest Ecosystem Dynamics"
+  author: ["Seidl, Rupert", "Rammer, Werner", "Scheller, Robert M.", "Spies, Thomas A."]
+  date: 2012
+  parent:
+    type: periodical
+    title: "Ecological Modelling"
+  volume: 231
+  page-range: 87-100
+  doi: "10.1016/j.ecolmodel.2012.02.015"
+

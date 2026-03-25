@@ -207,3 +207,81 @@ pub async fn federation_endpoint(Json(payload): Json<Value>) -> Json<Value> {
 pub async fn list_peers() -> Json<Value> {
     Json(json!({ "peers": [], "count": 0 }))
 }
+
+/// Analyze a user inquiry to determine appropriate datasets and fidelity levels.
+///
+/// Accepts: `{ "question": "...", "region": "...", "temporal_scope": "...", "budget": "low|medium|high|unlimited" }`
+/// Returns an `InquiryPlan` with recommended families, fidelities, datasets, and matching manifests.
+pub async fn analyze_inquiry(
+    State(state): State<AppState>,
+    Json(payload): Json<Value>,
+) -> Result<Json<Value>, StatusCode> {
+    let question = payload
+        .get("question")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+
+    if question.is_empty() {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
+    let region = payload
+        .get("region")
+        .and_then(|v| v.as_str())
+        .map(String::from);
+    let temporal_scope = payload
+        .get("temporal_scope")
+        .and_then(|v| v.as_str())
+        .map(String::from);
+    let budget_str = payload
+        .get("budget")
+        .and_then(|v| v.as_str())
+        .unwrap_or("medium");
+
+    let budget = match budget_str {
+        "low" => maesma_core::BudgetConstraint::Low,
+        "high" => maesma_core::BudgetConstraint::High,
+        "unlimited" => maesma_core::BudgetConstraint::Unlimited,
+        _ => maesma_core::BudgetConstraint::Medium,
+    };
+
+    let inquiry = maesma_core::Inquiry {
+        question,
+        region,
+        temporal_scope,
+        budget,
+    };
+
+    let mut plan = maesma_agents::intent_scope::IntentScopeAgent::analyze_inquiry(&inquiry);
+
+    // Enrich plan with matching manifests from the knowledgebase
+    if let Ok(kb) = maesma_knowledgebase::KnowledgebaseStore::open(&state.db_path) {
+        let requirements: Vec<(maesma_core::ProcessFamily, maesma_core::FidelityRung)> = plan
+            .fidelity_map
+            .iter()
+            .map(|fr| (fr.family, fr.recommended_rung))
+            .collect();
+
+        if let Ok(result) = kb.search_for_inquiry(&requirements) {
+            plan.manifests = result
+                .manifests
+                .iter()
+                .map(|m| maesma_core::ManifestMatch {
+                    manifest_id: m.id.to_string(),
+                    name: m.name.clone(),
+                    family: m.family,
+                    rung: m.rung,
+                    relevance_score: if plan.primary_families.contains(&m.family) {
+                        0.9
+                    } else {
+                        0.6
+                    },
+                })
+                .collect();
+        }
+    }
+
+    let response = serde_json::to_value(&plan).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    Ok(Json(response))
+}

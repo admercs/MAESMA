@@ -43,6 +43,8 @@ pub enum InferenceTask {
     PredictRegime,
     /// Suggest next assembly action.
     SuggestAction,
+    /// Analyze a user inquiry to recommend families, fidelities, and datasets.
+    AnalyzeInquiry,
 }
 
 /// Output from the inference engine.
@@ -115,6 +117,7 @@ impl InferenceEngine for HeuristicInferenceEngine {
             InferenceTask::RankAssemblies => self.rank_assemblies(&request),
             InferenceTask::PredictRegime => self.predict_regime(&request),
             InferenceTask::SuggestAction => self.suggest_action(&request),
+            InferenceTask::AnalyzeInquiry => self.analyze_inquiry(&request),
         };
 
         let latency_ms = start.elapsed().as_secs_f64() * 1000.0;
@@ -282,5 +285,53 @@ impl HeuristicInferenceEngine {
         let keep = (1.0_f64 - needs_more - needs_upgrade - needs_trim - needs_discovery).max(0.05);
 
         vec![needs_more, needs_upgrade, needs_trim, needs_discovery, keep]
+    }
+
+    /// Analyze a user inquiry to produce family relevance scores.
+    ///
+    /// The context map must contain a `"question"` key with the user query
+    /// string. Returns a score vector of length 13 — one per ProcessFamily
+    /// in the canonical order from `ProcessFamily::all()`.
+    fn analyze_inquiry(&self, request: &InferenceRequest) -> Vec<f64> {
+        use maesma_core::inquiry::family_keywords;
+
+        let question = request
+            .context
+            .get("question")
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
+        let lower = question.to_lowercase();
+
+        let families = maesma_core::ProcessFamily::all();
+        let keywords = family_keywords();
+
+        let mut scores = vec![0.0_f64; families.len()];
+
+        for kw in &keywords {
+            if lower.contains(kw.keyword) {
+                if let Some(idx) = families.iter().position(|f| *f == kw.family) {
+                    let boost = if kw.strong { 0.4 } else { 0.15 };
+                    scores[idx] = (scores[idx] + boost).min(1.0);
+                }
+            }
+        }
+
+        // If no family matched, give a baseline to Atmosphere + Hydrology
+        if scores.iter().all(|&s| s == 0.0) {
+            if let Some(atm) = families
+                .iter()
+                .position(|f| *f == maesma_core::ProcessFamily::Atmosphere)
+            {
+                scores[atm] = 0.2;
+            }
+            if let Some(hyd) = families
+                .iter()
+                .position(|f| *f == maesma_core::ProcessFamily::Hydrology)
+            {
+                scores[hyd] = 0.2;
+            }
+        }
+
+        scores
     }
 }
